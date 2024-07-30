@@ -1,4 +1,7 @@
-export default function Page() {
+"use client";
+import withAuth from "@/components/authWrapper";
+
+function Event() {
 	return (
 		<>
 			{" "}
@@ -6,7 +9,7 @@ export default function Page() {
 				<section className='sticky'>
 					<div className='max-w-lg px-4 pt-24 mx-auto text-left md:max-w-none md:text-center'>
 						<h1 className='font-extrabold leading-5 tracking-tight text-[#201515]  sm:leading-none text-3xl sm:text-8xl'>
-							<span className='inline md:block'>About</span>
+							<span className='inline md:block'>Events</span>
 						</h1>
 					</div>
 				</section>
@@ -14,3 +17,5 @@ export default function Page() {
 		</>
 	);
 }
+
+export default withAuth(Event);

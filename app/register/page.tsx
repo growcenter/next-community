@@ -1,10 +1,9 @@
 "use client";
-import { signInSchema } from "@/lib/schemas/signInSchema";
+import { userSchema } from "@/lib/schemas/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../components/authProvider";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -16,18 +15,21 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-export default function LogIn() {
+export default function Register() {
 	const router = useRouter();
-	const { login } = useAuth();
-
-	const form = useForm<z.infer<typeof signInSchema>>({
-		resolver: zodResolver(signInSchema),
+	// 1. Define your form.
+	const form = useForm<z.infer<typeof userSchema>>({
+		resolver: zodResolver(userSchema),
+		defaultValues: {
+			phoneNumber: "",
+			email: "",
+		},
 	});
 
-	async function onSubmit(values: z.infer<typeof signInSchema>) {
+	async function onSubmit(values: z.infer<typeof userSchema>) {
 		try {
 			const response = await fetch(
-				"http://localhost:8080/api/v1/event/user/login",
+				"http://localhost:8080/api/v1/event/user/register",
 				{
 					method: "POST",
 					headers: {
@@ -37,23 +39,23 @@ export default function LogIn() {
 					body: JSON.stringify(values),
 				}
 			);
+
 			if (response.ok) {
 				const result = await response.json();
-				console.log("User Signed in successfully:", result);
-				login(result);
-				router.push("/");
+				console.log("User registered successfully:", result);
+				router.push("/login");
 			} else {
-				console.error("Failed to Log In user:", response.statusText);
+				console.log(values);
+				console.error("Failed to register user:", response.statusText);
 			}
 		} catch (error) {
 			console.error("An error occurred:", error);
 		}
 	}
-
 	return (
 		<>
 			<h1 className='text-5xl text-center font-extrabold mx-auto mt-8'>
-				Log In
+				Register
 			</h1>
 			<Form {...form}>
 				<form
@@ -62,10 +64,10 @@ export default function LogIn() {
 				>
 					<FormField
 						control={form.control}
-						name='identifier'
+						name='name'
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Enter your email / phone number</FormLabel>
+								<FormLabel>Full Name</FormLabel>
 								<FormControl>
 									<Input placeholder='John Doe' {...field} />
 								</FormControl>
@@ -73,6 +75,33 @@ export default function LogIn() {
 							</FormItem>
 						)}
 					/>
+					<FormField
+						control={form.control}
+						name='email'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Email</FormLabel>
+								<FormControl>
+									<Input placeholder='agyasta1808@gmail.com' {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name='phoneNumber'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Phone Number</FormLabel>
+								<FormControl>
+									<Input type='tel' {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
 					<FormField
 						control={form.control}
 						name='password'
