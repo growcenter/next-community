@@ -82,6 +82,13 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 									</NavigationMenuLink>
 								</Link>
 							</NavigationMenuItem>
+							<NavigationMenuItem>
+								<Link href='/testqr' legacyBehavior passHref>
+									<NavigationMenuLink className={navigationMenuTriggerStyle()}>
+										Test QR
+									</NavigationMenuLink>
+								</Link>
+							</NavigationMenuItem>
 						</>
 					)}
 				</NavigationMenuList>

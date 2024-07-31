@@ -19,16 +19,7 @@ export default function Home() {
 								GROW.
 							</span>
 						</h1>
-						{isAuthenticated && userData && (
-							<div>
-								<p>Name: {userData.name}</p>
-								<p>Email: {userData.email}</p>
-								<p>Phone: {userData.phoneNumber}</p>
-								<p>Token: {userData.token}</p>
-								<p>Role: {userData.role}</p>
-								{/* Add other user data as needed */}
-							</div>
-						)}
+						{isAuthenticated && userData && <div></div>}
 					</div>
 				</section>
 			</main>

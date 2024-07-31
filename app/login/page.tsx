@@ -49,7 +49,6 @@ export default function LogIn() {
 			console.error("An error occurred:", error);
 		}
 	}
-
 	return (
 		<>
 			<h1 className='text-5xl text-center font-extrabold mx-auto mt-8'>

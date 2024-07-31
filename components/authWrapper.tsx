@@ -4,7 +4,7 @@ import { useAuth } from "./authProvider";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 
-const withAuth = (WrappedComponent: React.ComponentType) => {
+const withAuth = (WrappedComponent: React.ComponentType<any>) => {
 	const ComponentWithAuth = (props: any) => {
 		const { isAuthenticated } = useAuth();
 		const router = useRouter();

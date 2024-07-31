@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import withAuth from "@/components/authWrapper";
 import { useAuth } from "@/components/authProvider";
 import { Event } from "@/lib/types/event";
@@ -24,17 +23,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
-function Events() {
+function Dashboard() {
 	const [events, setEvents] = useState<Event[]>([]);
 	const { isAuthenticated, login, logout } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
-	const router = useRouter();
-
-	function handleSession(code: string) {
-		return router.push(`/events/${code}`);
-	}
 
 	useEffect(() => {
 		async function fetchEvents() {
@@ -72,24 +66,34 @@ function Events() {
 												<TableRow>
 													<TableHead>Name</TableHead>
 													<TableHead>Status</TableHead>
-													<TableHead>Description</TableHead>
-													<TableHead>Code</TableHead>
-													<TableHead>Registration Time</TableHead>
-													<TableHead></TableHead>
+													<TableHead className='hidden md:table-cell'>
+														Description
+													</TableHead>
+													<TableHead className='hidden md:table-cell'>
+														Code
+													</TableHead>
+													<TableHead className='hidden md:table-cell'>
+														Registration Time
+													</TableHead>
+													<TableHead className='hidden md:table-cell'></TableHead>
 												</TableRow>
 											</TableHeader>
 											<TableBody>
 												{events.map((event) => (
-													<TableRow key={event.id}>
+													<TableRow key={event.code}>
 														<TableCell className='font-medium'>
 															{event.name}
 														</TableCell>
 														<TableCell>
 															<Badge variant='outline'>{event.status}</Badge>
 														</TableCell>
-														<TableCell>{event.description}</TableCell>
-														<TableCell>{event.code}</TableCell>
-														<TableCell>
+														<TableCell className='hidden md:table-cell'>
+															{event.description}
+														</TableCell>
+														<TableCell className='hidden md:table-cell'>
+															{event.code}
+														</TableCell>
+														<TableCell className='hidden md:table-cell'>
 															{new Date(
 																event.openRegistration
 															).toLocaleString()}{" "}
@@ -98,10 +102,8 @@ function Events() {
 																event.closedRegistration
 															).toLocaleString()}
 														</TableCell>
-														<TableCell>
-															<Button onClick={() => handleSession(event.code)}>
-																View
-															</Button>
+														<TableCell className='hidden md:table-cell'>
+															<Button>Register</Button>
 														</TableCell>
 													</TableRow>
 												))}
@@ -118,4 +120,4 @@ function Events() {
 	);
 }
 
-export default withAuth(Events);
+export default withAuth(Dashboard);
