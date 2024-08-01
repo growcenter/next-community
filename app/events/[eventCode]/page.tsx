@@ -1,19 +1,19 @@
 "use client";
 
-import withAuth from "@/components/AuthWrapper";
-import { useAuth } from "@/components/AuthProvider";
-import { EventSession } from "@/lib/types/eventSession";
-import { RegisterCard } from "@/components/RegisterCard";
+import withAuth from "../../../components/AuthWrapper";
+import { useAuth } from "../../../components/AuthProvider";
+import { EventSession } from "../../../lib/types/eventSession";
+import { RegisterCard } from "../../../components/RegisterCard";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "../../../components/ui/badge";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
+} from "../../../components/ui/card";
 import {
 	Table,
 	TableBody,
@@ -21,9 +21,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+} from "../../../components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Button } from "../../../components/ui/button";
 
 function EventSessions({ params }: { params: { eventCode: string } }) {
 	const [sessions, setSessions] = useState<EventSession[]>([]);
