@@ -37,13 +37,14 @@ function Registrations() {
 		async function fetchRegistrations() {
 			if (!userData?.token) return;
 
+			const registeredBy = userData.email || userData.phoneNumber;
 			const response = await fetch(
 				`http://localhost:8080/api/v1/events/registration?registeredBy=${encodeURIComponent(
-					userData.email
+					registeredBy
 				)}`,
 				{
 					headers: {
-						"X-API-KEY": "gc2024",
+						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
 						"Content-Type": "application/json",
 						Authorization: `Bearer ${userData.token}`,
 					},

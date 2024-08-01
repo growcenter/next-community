@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 interface RegisterCardProps {
 	session: EventSession;
 }
+
 export function RegisterCard({ session }: RegisterCardProps) {
 	const { isAuthenticated } = useAuth();
 	const userData = isAuthenticated
@@ -33,7 +35,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 
 	const addInput = () => {
 		if (additionalInputs.length < 3) {
-			setAdditionalInputs([...additionalInputs, { name: "", address }]);
+			setAdditionalInputs([...additionalInputs, { name: "", address: "" }]);
 		}
 	};
 
@@ -74,7 +76,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 				headers: {
 					Authorization: `Bearer ${token}`,
 					"Content-Type": "application/json",
-					"X-API-Key": "gc2024",
+					"X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "",
 				},
 				body: JSON.stringify(payload),
 			}
@@ -121,22 +123,41 @@ export function RegisterCard({ session }: RegisterCardProps) {
 							/>
 						</div>
 						{additionalInputs.map((input, index) => (
-							<div key={index} className='grid grid-cols-4 items-center gap-4'>
-								<Label htmlFor={`additional${index}`} className='text-right'>
-									Additional Persons {index + 1}
-								</Label>
-								<Input
-									id={`additional${index}`}
-									className='col-span-3'
-									value={input.name}
-									onChange={(e) =>
-										setAdditionalInputs(
-											additionalInputs.map((input, i) =>
-												i === index ? { ...input, name: e.target.value } : input
+							<div key={index} className='grid gap-4'>
+								<div className='grid grid-cols-4 items-center gap-4'>
+									<Label htmlFor={`additional-name${index}`} className='text-right'>
+										Additional Person {index + 1} Name
+									</Label>
+									<Input
+										id={`additional-name${index}`}
+										className='col-span-3'
+										value={input.name}
+										onChange={(e) =>
+											setAdditionalInputs(
+												additionalInputs.map((input, i) =>
+													i === index ? { ...input, name: e.target.value } : input
+												)
 											)
-										)
-									}
-								/>
+										}
+									/>
+								</div>
+								<div className='grid grid-cols-4 items-center gap-4'>
+									<Label htmlFor={`additional-address${index}`} className='text-right'>
+										Additional Person {index + 1} Address
+									</Label>
+									<Input
+										id={`additional-address${index}`}
+										className='col-span-3'
+										value={input.address}
+										onChange={(e) =>
+											setAdditionalInputs(
+												additionalInputs.map((input, i) =>
+													i === index ? { ...input, address: e.target.value } : input
+												)
+											)
+										}
+									/>
+								</div>
 							</div>
 						))}
 					</div>
@@ -160,3 +181,5 @@ export function RegisterCard({ session }: RegisterCardProps) {
 		</Dialog>
 	);
 }
+
+export default RegisterCard;

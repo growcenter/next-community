@@ -11,7 +11,7 @@ import {
 	navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { CiHome } from "react-icons/ci";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "./AuthProvider";
 
 interface NavHeaderProps {
 	children: ReactNode;
@@ -19,7 +19,11 @@ interface NavHeaderProps {
 
 export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 	const { isAuthenticated, logout } = useAuth();
+	const userData = isAuthenticated
+		? JSON.parse(localStorage.getItem("userData") || "{}")
+		: null;
 	const router = useRouter();
+	console.log(userData);
 
 	const handleLogout = () => {
 		logout();
@@ -39,7 +43,7 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 					</NavigationMenuItem>
 				</NavigationMenuList>
 				<NavigationMenuList>
-					{isAuthenticated ? (
+					{isAuthenticated && userData.role == "user" ? (
 						<>
 							<NavigationMenuItem>
 								<Link href='/dashboard' legacyBehavior passHref>
@@ -82,13 +86,7 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 									</NavigationMenuLink>
 								</Link>
 							</NavigationMenuItem>
-							<NavigationMenuItem>
-								<Link href='/testqr' legacyBehavior passHref>
-									<NavigationMenuLink className={navigationMenuTriggerStyle()}>
-										Test QR
-									</NavigationMenuLink>
-								</Link>
-							</NavigationMenuItem>
+							
 						</>
 					)}
 				</NavigationMenuList>

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../components/AuthProvider";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -19,12 +20,16 @@ import { Input } from "@/components/ui/input";
 export default function LogIn() {
 	const router = useRouter();
 	const { login } = useAuth();
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [showPassword, setShowPassword] = useState(false);
 
 	const form = useForm<z.infer<typeof signInSchema>>({
 		resolver: zodResolver(signInSchema),
 	});
 
 	async function onSubmit(values: z.infer<typeof signInSchema>) {
+		setErrorMessage(null); // Reset error message
+
 		try {
 			const response = await fetch(
 				"http://localhost:8080/api/v1/event/user/login",
@@ -32,23 +37,32 @@ export default function LogIn() {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						"X-API-Key": "gc2024",
+						"X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "",
 					},
 					body: JSON.stringify(values),
 				}
 			);
 			if (response.ok) {
 				const result = await response.json();
-				console.log("User Signed in successfully:", result);
 				login(result);
 				router.push("/");
 			} else {
-				console.error("Failed to Log In user:", response.statusText);
+				const errorResult = await response.json();
+				console.log(errorResult);
+				if (errorResult.status === "DATA_NOT_FOUND") {
+					setErrorMessage("User not found. Please register / check your email or phone number.");
+				} else if (errorResult.status === "INVALID_CREDENTIALS") {
+					setErrorMessage("Invalid password. Please try again!");
+				} else {
+					setErrorMessage("Failed to log in. Please try again.");
+				}
 			}
 		} catch (error) {
+			setErrorMessage("An error occurred. Please try again.");
 			console.error("An error occurred:", error);
 		}
 	}
+
 	return (
 		<>
 			<h1 className='text-5xl text-center font-extrabold mx-auto mt-8'>
@@ -59,6 +73,11 @@ export default function LogIn() {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className='w-1/2 p-10 mx-auto mt-8 border'
 				>
+					{errorMessage && (
+						<div className='mb-4 text-red-500 text-center'>
+							{errorMessage}
+						</div>
+					)}
 					<FormField
 						control={form.control}
 						name='identifier'
@@ -79,12 +98,22 @@ export default function LogIn() {
 							<FormItem>
 								<FormLabel>Password</FormLabel>
 								<FormControl>
-									<Input type='password' {...field} />
+									<Input type={showPassword ? 'text' : 'password'} {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
 						)}
 					/>
+					<div className="flex items-center">
+						<input
+							id="showPassword"
+							type="checkbox"
+							checked={showPassword}
+							onChange={() => setShowPassword(!showPassword)}
+							className="mr-2"
+						/>
+						<label htmlFor="showPassword">Show Password</label>
+					</div>
 					<Button className='mt-4' type='submit'>
 						Submit
 					</Button>
