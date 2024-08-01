@@ -64,7 +64,7 @@ function Events() {
 								<Card x-chunk='dashboard-06-chunk-0'>
 									<CardHeader>
 										<CardTitle>Events</CardTitle>
-										<CardDescription>Grow Community's Events</CardDescription>
+										<CardDescription>Grow Community`&apos;`s Events</CardDescription>
 									</CardHeader>
 									<CardContent>
 										<Table>
