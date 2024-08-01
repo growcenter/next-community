@@ -95,7 +95,9 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 														</TableCell>
 														<TableCell>{session.availableSeats}</TableCell>
 														<TableCell>
-															<RegisterCard session={session}></RegisterCard>
+															{session.status == "active" && (
+																		<RegisterCard session={session}></RegisterCard>
+																								)}
 														</TableCell>
 													</TableRow>
 												))}

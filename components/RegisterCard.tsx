@@ -4,6 +4,7 @@ import { useAuth } from "./AuthProvider";
 import { useState, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { EventSession } from "@/lib/types/eventSession";
+import { UserRoundPlus, UserRoundMinus } from "lucide-react";
 import {
 	Dialog,
 	DialogContent,
@@ -15,6 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 interface RegisterCardProps {
 	session: EventSession;
@@ -32,6 +35,8 @@ export function RegisterCard({ session }: RegisterCardProps) {
 		{ name: string; address: string }[]
 	>([]);
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+	const { toast } = useToast();
+	const router = useRouter();
 
 	const addInput = () => {
 		if (additionalInputs.length < 3) {
@@ -69,21 +74,43 @@ export function RegisterCard({ session }: RegisterCardProps) {
 			otherRegister: additionalInputs,
 		};
 
-		const response = await fetch(
-			"http://localhost:8080/api/v1/events/registration",
-			{
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "application/json",
-					"X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "",
-				},
-				body: JSON.stringify(payload),
-			}
-		);
+		try {
+			const response = await fetch(
+				"http://localhost:8080/api/v1/events/registration",
+				{
+					method: "POST",
+					headers: {
+						Authorization: `Bearer ${token}`,
+						"Content-Type": "application/json",
+						"X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "",
+					},
+					body: JSON.stringify(payload),
+				}
+			);
 
-		const result = await response.json();
-		console.log(result);
+			const result = await response.json();
+			console.log(result);
+
+			if (response.ok) {
+				toast({
+					title: "Registration Successful",
+					description: `You have successfully registered for ${session.name}! Redirecting to home page....`,
+				});
+				
+				// Redirect to home page after a delay
+				setTimeout(() => {
+					router.push("/");
+				}, 3000); // Adjust the delay as needed (3000ms = 3 seconds)
+			}
+			
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: error as string,
+				variant: "destructive",
+			});
+			console.error("An error occurred:", error);
+		}
 	};
 
 	return (
@@ -164,13 +191,13 @@ export function RegisterCard({ session }: RegisterCardProps) {
 					<DialogFooter>
 						<div className='flex gap-2'>
 							{additionalInputs.length < 3 && (
-								<Button type='button' onClick={addInput}>
-									+
+								<Button variant="outline" size="icon" onClick={addInput}>
+									<UserRoundPlus/>
 								</Button>
 							)}
 							{additionalInputs.length > 0 && (
-								<Button type='button' onClick={removeInput}>
-									-
+								<Button variant="outline" size="icon" onClick={removeInput}>
+									<UserRoundMinus/>
 								</Button>
 							)}
 						</div>

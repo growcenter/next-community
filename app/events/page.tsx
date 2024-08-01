@@ -73,7 +73,7 @@ function Events() {
 													<TableHead>Name</TableHead>
 													<TableHead>Status</TableHead>
 													<TableHead>Description</TableHead>
-													<TableHead>Code</TableHead>
+													
 													<TableHead>Registration Time</TableHead>
 													<TableHead></TableHead>
 												</TableRow>
@@ -88,7 +88,7 @@ function Events() {
 															<Badge variant='outline'>{event.status}</Badge>
 														</TableCell>
 														<TableCell>{event.description}</TableCell>
-														<TableCell>{event.code}</TableCell>
+														
 														<TableCell>
 															{new Date(
 																event.openRegistration
@@ -99,9 +99,11 @@ function Events() {
 															).toLocaleString()}
 														</TableCell>
 														<TableCell>
-															<Button onClick={() => handleSession(event.code)}>
+															{event.status == "active" && (
+															<Button onClick={() => handleSession(event.code)}>	
 																View
-															</Button>
+															</Button>)}
+															
 														</TableCell>
 													</TableRow>
 												))}
