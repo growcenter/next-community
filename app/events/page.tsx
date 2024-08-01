@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import withAuth from "@/components/authWrapper";
-import { useAuth } from "@/components/authProvider";
+import withAuth from "@/components/AuthWrapper";
+import { useAuth } from "@/components/AuthProvider";
 import { Event } from "@/lib/types/event";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";

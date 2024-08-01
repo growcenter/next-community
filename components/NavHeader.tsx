@@ -11,7 +11,7 @@ import {
 	navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { CiHome } from "react-icons/ci";
-import { useAuth } from "@/components/authProvider";
+import { useAuth } from "@/components/AuthProvider";
 
 interface NavHeaderProps {
 	children: ReactNode;

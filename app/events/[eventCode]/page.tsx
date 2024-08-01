@@ -1,8 +1,9 @@
 "use client";
 
-import withAuth from "@/components/authWrapper";
-import { useAuth } from "@/components/authProvider";
+import withAuth from "@/components/AuthWrapper";
+import { useAuth } from "@/components/AuthProvider";
 import { EventSession } from "@/lib/types/eventSession";
+import { RegisterCard } from "@/components/RegisterCard";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -73,16 +74,10 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 												<TableRow>
 													<TableHead>Session Name</TableHead>
 													<TableHead>Status</TableHead>
-													<TableHead className='hidden md:table-cell'>
-														Description
-													</TableHead>
-													<TableHead className='hidden md:table-cell'>
-														Time
-													</TableHead>
-													<TableHead className='hidden md:table-cell'>
-														Available Seats
-													</TableHead>
-													<TableHead className='hidden md:table-cell'></TableHead>
+													<TableHead>Description</TableHead>
+													<TableHead>Time</TableHead>
+													<TableHead>Available Seats</TableHead>
+													<TableHead></TableHead>
 												</TableRow>
 											</TableHeader>
 											<TableBody>
@@ -94,17 +89,13 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 														<TableCell>
 															<Badge variant='outline'>{session.status}</Badge>
 														</TableCell>
-														<TableCell className='hidden md:table-cell'>
-															{session.description}
-														</TableCell>
-														<TableCell className='hidden md:table-cell'>
+														<TableCell>{session.description}</TableCell>
+														<TableCell>
 															{new Date(session.time).toLocaleString()}
 														</TableCell>
-														<TableCell className='hidden md:table-cell'>
-															{session.availableSeats}
-														</TableCell>
-														<TableCell className='hidden md:table-cell'>
-															<Button>Register</Button>
+														<TableCell>{session.availableSeats}</TableCell>
+														<TableCell>
+															<RegisterCard session={session}></RegisterCard>
 														</TableCell>
 													</TableRow>
 												))}
