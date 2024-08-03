@@ -14,6 +14,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/app/components/ui/form";
+import { Label } from "@radix-ui/react-label";
 import { Input } from "@/app/components/ui/input";
 
 export default function Register() {
@@ -34,7 +35,7 @@ export default function Register() {
 
 		try {
 			const response = await fetch(
-				"http://localhost:8080/api/v1/event/user/register",
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/event/user/register`,
 				{
 					method: "POST",
 					headers: {
@@ -47,11 +48,11 @@ export default function Register() {
 
 			if (response.ok) {
 				const result = await response.json();
-				console.log("User registered successfully:", result);
+
 				router.push("/login");
 			} else {
 				const errorResult = await response.json();
-				console.log(errorResult);
+
 				if (errorResult.status === "ALREADY_EXISTS") {
 					setErrorMessage(
 						"User with your email/phone number already exists. Please log in!"
@@ -77,6 +78,9 @@ export default function Register() {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className="w-full max-w-md p-6 mx-auto mt-8 border rounded-lg shadow-md bg-white"
 				>
+					<Label className="text-sm  text-center text-red-500 font-style : italic">
+						*Please input at least an email or phone number (or both)
+					</Label>
 					{errorMessage && (
 						<div className="mb-4 text-red-500 text-center">{errorMessage}</div>
 					)}
@@ -113,7 +117,11 @@ export default function Register() {
 							<FormItem>
 								<FormLabel>Phone Number</FormLabel>
 								<FormControl>
-									<Input type="tel" {...field} />
+									<Input
+										type="tel"
+										{...field}
+										placeholder="Please input this format: 081234567890"
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>

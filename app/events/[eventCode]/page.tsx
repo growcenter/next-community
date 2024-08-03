@@ -57,7 +57,7 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 			if (!userData?.token || !params.eventCode) return;
 
 			const response = await fetch(
-				`http://localhost:8080/api/v1/events/${params.eventCode}/sessions`,
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/${params.eventCode}/sessions`,
 				{
 					headers: {
 						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",

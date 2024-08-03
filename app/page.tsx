@@ -21,7 +21,7 @@ export default function Home() {
 						</h1>
 						{isAuthenticated && userData && (
 							<div className="mt-4 text-center">
-								<p className="text-lg">Hello, {userData.name}!</p>
+								<p className="text-lg">Shalom, {userData.name}!</p>
 							</div>
 						)}
 					</div>

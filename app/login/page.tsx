@@ -17,12 +17,24 @@ import {
 	FormLabel,
 	FormMessage,
 } from "../components/ui/form";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+	DialogFooter,
+} from "../components/ui/dialog";
 
 export default function LogIn() {
 	const router = useRouter();
 	const { login } = useAuth();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [showPassword, setShowPassword] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [identifier, setIdentifier] = useState("");
+	const [password, setNewPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 
 	const form = useForm<z.infer<typeof signInSchema>>({
 		resolver: zodResolver(signInSchema),
@@ -33,7 +45,7 @@ export default function LogIn() {
 
 		try {
 			const response = await fetch(
-				"http://localhost:8080/api/v1/event/user/login",
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/event/user/login`,
 				{
 					method: "POST",
 					headers: {
@@ -49,7 +61,6 @@ export default function LogIn() {
 				router.push("/");
 			} else {
 				const errorResult = await response.json();
-				console.log(errorResult);
 				if (errorResult.status === "DATA_NOT_FOUND") {
 					setErrorMessage(
 						"User not found. Please register / check your email or phone number."
@@ -71,6 +82,39 @@ export default function LogIn() {
 		window.location.href = googleAuthUrl;
 	};
 
+	const handleResetPassword = async () => {
+		if (password !== confirmPassword) {
+			alert("Passwords do not match");
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/event/user/forgot`,
+				{
+					method: "PATCH",
+					headers: {
+						"Content-Type": "application/json",
+						"X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "",
+					},
+					body: JSON.stringify({ identifier, password }),
+				}
+			);
+			if (response.ok) {
+				alert("Password reset successfully");
+				setIsDialogOpen(false);
+				router.push("/"); // Redirect to the main page
+			} else {
+				const errorResult = await response.json();
+
+				alert("Failed to reset password: " + errorResult.message);
+			}
+		} catch (error) {
+			alert("An error occurred. Please try again.");
+			console.error("An error occurred:", error);
+		}
+	};
+
 	return (
 		<>
 			<h1 className="text-3xl md:text-5xl text-center font-extrabold mx-4 mt-8">
@@ -89,9 +133,12 @@ export default function LogIn() {
 						name="identifier"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Enter your email / phone number</FormLabel>
+								<FormLabel>Enter your email or phone number</FormLabel>
 								<FormControl>
-									<Input placeholder="example@example.com" {...field} />
+									<Input
+										placeholder="example@example.com or 081234567890"
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -123,17 +170,88 @@ export default function LogIn() {
 					<Button className="w-full py-2" type="submit">
 						Submit
 					</Button>
+					<Button
+						className="w-full mx-auto text-center py-2 mt-4"
+						type="button"
+						variant="outline"
+						onClick={() => setIsDialogOpen(true)}
+					>
+						Forgot Password?
+					</Button>
 				</form>
 			</Form>
-			<div className="text-center mt-4">
-				<Button
-					variant="outline"
-					onClick={handleGoogleSignIn}
-					className="w-1/2 py-2"
-				>
-					Sign in with Google
-				</Button>
-			</div>
+			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Reset Password</DialogTitle>
+						<DialogDescription>
+							Enter your identifier and new password below.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4 py-4">
+						<div>
+							<label
+								htmlFor="identifier"
+								className="block text-sm font-medium text-gray-700 mb-3"
+							>
+								Identifier
+							</label>
+							<Input
+								id="identifier"
+								placeholder="Enter your email or phone number"
+								value={identifier}
+								onChange={(e) => setIdentifier(e.target.value)}
+							/>
+						</div>
+						<div>
+							<label
+								htmlFor="newPassword"
+								className="block text-sm font-medium text-gray-700 mb-3"
+							>
+								New Password
+							</label>
+							<Input
+								id="newPassword"
+								type={showPassword ? "text" : "password"}
+								placeholder="Enter your new password"
+								value={password}
+								onChange={(e) => setNewPassword(e.target.value)}
+							/>
+						</div>
+						<div>
+							<label
+								htmlFor="confirmPassword"
+								className="block text-sm font-medium text-gray-700 mb-3"
+							>
+								Confirm New Password
+							</label>
+							<Input
+								id="confirmPassword"
+								type={showPassword ? "text" : "password"}
+								placeholder="Re-enter your new password"
+								value={confirmPassword}
+								onChange={(e) => setConfirmPassword(e.target.value)}
+							/>
+						</div>
+						<div className="flex items-center mb-4">
+							<input
+								id="showPasswordDialog"
+								type="checkbox"
+								checked={showPassword}
+								onChange={() => setShowPassword(!showPassword)}
+								className="mr-2"
+							/>
+							<label htmlFor="showPasswordDialog">Show Passwords</label>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button className="my-4 md:my-0" onClick={handleResetPassword}>
+							Submit
+						</Button>
+						<Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</>
 	);
 }

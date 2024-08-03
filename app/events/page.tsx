@@ -57,13 +57,16 @@ function Events() {
 		async function fetchEvents() {
 			if (!userData?.token) return;
 
-			const response = await fetch("http://localhost:8080/api/v1/events", {
-				headers: {
-					"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${userData.token}`,
-				},
-			});
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events`,
+				{
+					headers: {
+						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${userData.token}`,
+					},
+				}
+			);
 			const data = await response.json();
 			setEvents(data.data);
 		}

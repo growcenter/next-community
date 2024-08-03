@@ -27,9 +27,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogDescription,
-	DialogTrigger,
 	DialogFooter,
 } from "../components/ui/dialog";
+import { Label } from "@radix-ui/react-label";
 import { EventRegistration } from "@/lib/types/eventRegistration";
 import QRDialog from "../components/QRComponent";
 
@@ -64,7 +64,9 @@ function Registrations() {
 
 		try {
 			const response = await fetch(
-				`http://localhost:8080/api/v1/events/registration?registeredBy=${encodeURIComponent(
+				`${
+					process.env.NEXT_PUBLIC_API_BASE_URL
+				}/api/v1/events/registration?registeredBy=${encodeURIComponent(
 					identifier
 				)}`,
 				{
@@ -118,11 +120,42 @@ function Registrations() {
 		setSelectedRegistration(null);
 	};
 
+	const handleDelete = async (code: string) => {
+		const confirm = window.confirm(
+			"Are you sure you want to delete this registration?"
+		);
+		if (!confirm) return;
+
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/registration/${code}`,
+				{
+					method: "DELETE",
+					headers: {
+						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${userData?.token}`,
+					},
+				}
+			);
+			if (response.ok) {
+				setRegistrations((prev) => prev.filter((reg) => reg.code !== code));
+				alert("Registration deleted successfully.");
+			} else {
+				const errorResult = await response.json();
+				alert("Failed to delete registration: " + errorResult.message);
+			}
+		} catch (error) {
+			alert("An error occurred. Please try again.");
+			console.error("An error occurred:", error);
+		}
+	};
+
 	return (
 		<div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-scroll">
 			<div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
 				<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-					<div className="mx-auto my-4">
+					<div className="mx-auto mt-4">
 						<input
 							type="text"
 							placeholder="Enter Identifier"
@@ -138,6 +171,10 @@ function Registrations() {
 							Clear
 						</Button>
 					</div>
+					<Label className="text-sm  text-center text-red-500 font-style : italic">
+						*Please input your identifier : email or phone number (format:
+						081234567890)
+					</Label>
 					<Tabs defaultValue="all">
 						<TabsContent value="all">
 							<Card x-chunk="dashboard-06-chunk-0">
@@ -152,7 +189,9 @@ function Registrations() {
 												<TableHeader>
 													<TableRow>
 														<TableHead>Name</TableHead>
-														<TableHead>Event</TableHead>
+														<TableHead className="hidden md:table-cell">
+															Event
+														</TableHead>
 														<TableHead className="hidden md:table-cell">
 															Session
 														</TableHead>
@@ -160,12 +199,13 @@ function Registrations() {
 															Status
 														</TableHead>
 														<TableHead>QR</TableHead>
+														<TableHead>Actions</TableHead>
 													</TableRow>
 												</TableHeader>
 												<TableBody>
 													{registrations.length === 0 ? (
 														<TableRow>
-															<TableCell colSpan={5} className="text-center">
+															<TableCell colSpan={6} className="text-center">
 																No registrations found.
 															</TableCell>
 														</TableRow>
@@ -173,19 +213,25 @@ function Registrations() {
 														registrations.map((registration, index) => (
 															<TableRow
 																key={`${index}-main`}
-																onClick={() => handleRowClick(registration)}
 																className="cursor-pointer"
 															>
 																<TableCell className="font-medium">
 																	{isSmallScreen ? (
-																		<button className="text-blue-500 underline sm:no-underline">
+																		<button
+																			className="text-blue-500 underline sm:no-underline"
+																			onClick={() =>
+																				handleRowClick(registration)
+																			}
+																		>
 																			{registration.name}
 																		</button>
 																	) : (
 																		registration.name
 																	)}
 																</TableCell>
-																<TableCell>{registration.eventName}</TableCell>
+																<TableCell className="hidden md:table-cell">
+																	{registration.eventName}
+																</TableCell>
 																<TableCell className="hidden md:table-cell">
 																	{registration.sessionName}
 																</TableCell>
@@ -195,9 +241,23 @@ function Registrations() {
 																	</Badge>
 																</TableCell>
 																<TableCell>
-																	<QRDialog
-																		registrationCode={registration.code}
-																	/>
+																	{registration.status === "registered" && (
+																		<QRDialog
+																			registrationCode={registration.code}
+																		/>
+																	)}
+																</TableCell>
+																<TableCell>
+																	{registration.status === "registered" && (
+																		<Button
+																			variant="outline"
+																			onClick={() =>
+																				handleDelete(registration.code)
+																			}
+																		>
+																			❌
+																		</Button>
+																	)}
 																</TableCell>
 															</TableRow>
 														))

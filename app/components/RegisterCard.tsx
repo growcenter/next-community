@@ -91,7 +91,6 @@ export function RegisterCard({ session }: RegisterCardProps) {
 			);
 
 			const result = await response.json();
-			console.log(result);
 
 			if (response.ok) {
 				toast({
