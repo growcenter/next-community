@@ -3,7 +3,7 @@ import React from "react";
 
 const Footer: React.FC = () => {
 	return (
-		<div className="bg-gray-800 text-white py-4 mt-80">
+		<div className="container bg-gray-800 text-white py-4 mt-80">
 			<div className="container mx-auto text-center">
 				<p className="text-sm">
 					For any issues or questions, please contact our{" "}

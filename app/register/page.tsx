@@ -69,13 +69,13 @@ export default function Register() {
 
 	return (
 		<>
-			<h1 className="text-5xl text-center font-extrabold mx-auto mt-8">
+			<h1 className="text-3xl md:text-5xl text-center font-extrabold mx-4 mt-8">
 				Register
 			</h1>
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className="w-1/2 p-10 mx-auto mt-8 border"
+					className="w-full max-w-md p-6 mx-auto mt-8 border rounded-lg shadow-md bg-white"
 				>
 					{errorMessage && (
 						<div className="mb-4 text-red-500 text-center">{errorMessage}</div>
@@ -100,7 +100,7 @@ export default function Register() {
 							<FormItem>
 								<FormLabel>Email</FormLabel>
 								<FormControl>
-									<Input placeholder="agyasta1808@gmail.com" {...field} />
+									<Input placeholder="example@gmail.com" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -132,7 +132,7 @@ export default function Register() {
 							</FormItem>
 						)}
 					/>
-					<div className="flex items-center">
+					<div className="flex items-center mb-4">
 						<input
 							id="showPassword"
 							type="checkbox"
@@ -142,7 +142,7 @@ export default function Register() {
 						/>
 						<label htmlFor="showPassword">Show Password</label>
 					</div>
-					<Button className="mt-4" type="submit">
+					<Button className="w-full py-2" type="submit">
 						Submit
 					</Button>
 				</form>

@@ -73,13 +73,13 @@ export default function LogIn() {
 
 	return (
 		<>
-			<h1 className="text-5xl text-center font-extrabold mx-auto mt-8">
+			<h1 className="text-3xl md:text-5xl text-center font-extrabold mx-4 mt-8">
 				Log In
 			</h1>
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className="w-1/2 p-10 mx-auto mt-8 border"
+					className="w-full max-w-md p-6 mx-auto mt-8 border rounded-lg shadow-md bg-white"
 				>
 					{errorMessage && (
 						<div className="mb-4 text-red-500 text-center">{errorMessage}</div>
@@ -91,7 +91,7 @@ export default function LogIn() {
 							<FormItem>
 								<FormLabel>Enter your email / phone number</FormLabel>
 								<FormControl>
-									<Input placeholder="John Doe" {...field} />
+									<Input placeholder="example@example.com" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -110,7 +110,7 @@ export default function LogIn() {
 							</FormItem>
 						)}
 					/>
-					<div className="flex items-center mt-3">
+					<div className="flex items-center mb-4">
 						<input
 							id="showPassword"
 							type="checkbox"
@@ -120,13 +120,17 @@ export default function LogIn() {
 						/>
 						<label htmlFor="showPassword">Show Password</label>
 					</div>
-					<Button className="mt-4" type="submit">
+					<Button className="w-full py-2" type="submit">
 						Submit
 					</Button>
 				</form>
 			</Form>
 			<div className="text-center mt-4">
-				<Button variant="outline" onClick={handleGoogleSignIn}>
+				<Button
+					variant="outline"
+					onClick={handleGoogleSignIn}
+					className="w-1/2 py-2"
+				>
 					Sign in with Google
 				</Button>
 			</div>
