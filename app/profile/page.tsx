@@ -1,16 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import withAuth from "../components/AuthWrapper";
 import { useAuth } from "../components/AuthProvider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "../components/ui/badge";
-import QRDialog from "../components/QRComponent";
 import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "../components/ui/card";
@@ -18,23 +15,49 @@ import {
 	Table,
 	TableBody,
 	TableCell,
-	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
 } from "../components/ui/table";
 import { Tabs, TabsContent } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+	DialogTrigger,
+	DialogFooter,
+} from "../components/ui/dialog";
 import { EventRegistration } from "@/lib/types/eventRegistration";
+import QRDialog from "../components/QRComponent";
 
 function Registrations() {
 	const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
 	const [identifier, setIdentifier] = useState<string>("");
 	const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+	const [selectedRegistration, setSelectedRegistration] =
+		useState<EventRegistration | null>(null);
+	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
 	const { isAuthenticated } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
+
+	useEffect(() => {
+		const handleResize = () => {
+			setIsSmallScreen(window.innerWidth <= 640); // Adjust the width as needed
+		};
+
+		handleResize(); // Initial check
+		window.addEventListener("resize", handleResize);
+
+		return () => {
+			window.removeEventListener("resize", handleResize);
+		};
+	}, []);
 
 	const fetchRegistrations = async () => {
 		if (!userData?.token || !identifier) return;
@@ -67,8 +90,8 @@ function Registrations() {
 		setIsSubmitted(true);
 		fetchRegistrations();
 	};
+
 	const isValidEmail = (email: string) => {
-		// Regular expression for basic email validation
 		const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return re.test(email);
 	};
@@ -78,14 +101,25 @@ function Registrations() {
 		setRegistrations([]);
 		setIsSubmitted(false);
 	};
+
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === "Enter") {
 			handleSearch();
 		}
 	};
 
+	const handleRowClick = (registration: EventRegistration) => {
+		setSelectedRegistration(registration);
+		setIsDialogOpen(true);
+	};
+
+	const handleDialogClose = () => {
+		setIsDialogOpen(false);
+		setSelectedRegistration(null);
+	};
+
 	return (
-		<div className="flex min-h-screen w-full flex-col bg-muted/40">
+		<div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-scroll">
 			<div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
 				<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
 					<div className="mx-auto my-4">
@@ -113,46 +147,64 @@ function Registrations() {
 								</CardHeader>
 								<CardContent>
 									{isSubmitted && (
-										<Table>
-											<TableHeader>
-												<TableRow>
-													<TableHead>Name</TableHead>
-													<TableHead>Event</TableHead>
-													<TableHead>Session</TableHead>
-													<TableHead>Status</TableHead>
-													<TableHead>QR</TableHead>
-												</TableRow>
-											</TableHeader>
-											<TableBody>
-												{registrations.length === 0 ? (
+										<div className="overflow-x-auto">
+											<Table className="min-w-full">
+												<TableHeader>
 													<TableRow>
-														<TableCell colSpan={5} className="text-center">
-															No registrations found.
-														</TableCell>
+														<TableHead>Name</TableHead>
+														<TableHead>Event</TableHead>
+														<TableHead className="hidden md:table-cell">
+															Session
+														</TableHead>
+														<TableHead className="hidden md:table-cell">
+															Status
+														</TableHead>
+														<TableHead>QR</TableHead>
 													</TableRow>
-												) : (
-													registrations.map((registration, index) => (
-														<TableRow key={`${index}-main`}>
-															<TableCell className="font-medium">
-																{registration.name}
-															</TableCell>
-															<TableCell>{registration.eventName}</TableCell>
-															<TableCell>{registration.sessionName}</TableCell>
-															<TableCell>
-																<Badge variant="outline">
-																	{registration.status}
-																</Badge>
-															</TableCell>
-															<TableCell>
-																<QRDialog
-																	registrationCode={registration.code}
-																/>
+												</TableHeader>
+												<TableBody>
+													{registrations.length === 0 ? (
+														<TableRow>
+															<TableCell colSpan={5} className="text-center">
+																No registrations found.
 															</TableCell>
 														</TableRow>
-													))
-												)}
-											</TableBody>
-										</Table>
+													) : (
+														registrations.map((registration, index) => (
+															<TableRow
+																key={`${index}-main`}
+																onClick={() => handleRowClick(registration)}
+																className="cursor-pointer"
+															>
+																<TableCell className="font-medium">
+																	{isSmallScreen ? (
+																		<button className="text-blue-500 underline sm:no-underline">
+																			{registration.name}
+																		</button>
+																	) : (
+																		registration.name
+																	)}
+																</TableCell>
+																<TableCell>{registration.eventName}</TableCell>
+																<TableCell className="hidden md:table-cell">
+																	{registration.sessionName}
+																</TableCell>
+																<TableCell className="hidden md:table-cell">
+																	<Badge variant="outline">
+																		{registration.status}
+																	</Badge>
+																</TableCell>
+																<TableCell>
+																	<QRDialog
+																		registrationCode={registration.code}
+																	/>
+																</TableCell>
+															</TableRow>
+														))
+													)}
+												</TableBody>
+											</Table>
+										</div>
 									)}
 								</CardContent>
 							</Card>
@@ -160,6 +212,34 @@ function Registrations() {
 					</Tabs>
 				</main>
 			</div>
+
+			{selectedRegistration && (
+				<Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+					<DialogContent className="sm:max-w-[425px] overflow-y-auto">
+						<DialogHeader>
+							<DialogTitle>{selectedRegistration.name}</DialogTitle>
+							<DialogDescription>
+								{selectedRegistration.eventName}
+							</DialogDescription>
+						</DialogHeader>
+						<div className="grid gap-4">
+							<div className="grid grid-cols-4 gap-4">
+								<label className="text-right font-medium">Session</label>
+								<p className="col-span-3">{selectedRegistration.sessionName}</p>
+							</div>
+							<div className="grid grid-cols-4 gap-4">
+								<label className="text-right font-medium">Status</label>
+								<p className="col-span-3">
+									<Badge variant="outline">{selectedRegistration.status}</Badge>
+								</p>
+							</div>
+						</div>
+						<DialogFooter>
+							<Button onClick={handleDialogClose}>Close</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			)}
 		</div>
 	);
 }

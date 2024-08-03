@@ -131,7 +131,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 			<DialogTrigger asChild>
 				<Button variant="outline">Register</Button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[425px] max-w-full px-2 py-2 sm:px-4 sm:py-4 overflow-y-scroll max-h-screen">
 				<form onSubmit={handleSubmit}>
 					<DialogHeader>
 						<DialogTitle>{session.name}</DialogTitle>
@@ -139,8 +139,8 @@ export function RegisterCard({ session }: RegisterCardProps) {
 							{new Date(session.time).toLocaleString()}
 						</DialogDescription>
 					</DialogHeader>
-					<div className="grid gap-4 py-4">
-						<div className="grid grid-cols-4 items-center gap-4">
+					<div className="grid gap-2 sm:gap-4 py-2 sm:py-4">
+						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 							<Label htmlFor="identifier" className="text-right">
 								Identifier
 							</Label>
@@ -152,7 +152,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 								placeholder="This will be used to get your tickets."
 							/>
 						</div>
-						<div className="grid grid-cols-4 items-center gap-4">
+						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 							<Label htmlFor="name" className="text-right">
 								Name
 							</Label>
@@ -163,7 +163,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 								onChange={(e) => setName(e.target.value)}
 							/>
 						</div>
-						<div className="grid grid-cols-4 items-center gap-4">
+						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 							<Label htmlFor="address" className="text-right">
 								Address
 							</Label>
@@ -175,8 +175,8 @@ export function RegisterCard({ session }: RegisterCardProps) {
 							/>
 						</div>
 						{additionalInputs.map((input, index) => (
-							<div key={index} className="grid gap-4">
-								<div className="grid grid-cols-4 items-center gap-4">
+							<div key={index} className="grid gap-2 sm:gap-4">
+								<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 									<Label
 										htmlFor={`additional-name${index}`}
 										className="text-right"
@@ -198,7 +198,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 										}
 									/>
 								</div>
-								<div className="grid grid-cols-4 items-center gap-4">
+								<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 									<Label
 										htmlFor={`additional-address${index}`}
 										className="text-right"
@@ -223,7 +223,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 							</div>
 						))}
 					</div>
-					<DialogFooter>
+					<DialogFooter className="sticky bottom-0 bg-white">
 						<div className="flex gap-2">
 							{additionalInputs.length < 3 && (
 								<Button
