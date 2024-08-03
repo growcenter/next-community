@@ -1,19 +1,19 @@
 "use client";
 
-import withAuth from "../../../components/AuthWrapper";
-import { useAuth } from "../../../components/AuthProvider";
+import withAuth from "../../components/AuthWrapper";
+import { useAuth } from "../../components/AuthProvider";
 import { EventSession } from "../../../lib/types/eventSession";
-import { RegisterCard } from "../../../components/RegisterCard";
+import { RegisterCard } from "../../components/RegisterCard";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Badge } from "../../../components/ui/badge";
+import { Badge } from "../../components/ui/badge";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "../../../components/ui/card";
+} from "../../components/ui/card";
 import {
 	Table,
 	TableBody,
@@ -21,9 +21,14 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "../../../components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import { Button } from "../../../components/ui/button";
+} from "../../components/ui/table";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
 
 function EventSessions({ params }: { params: { eventCode: string } }) {
 	const [sessions, setSessions] = useState<EventSession[]>([]);
@@ -56,12 +61,12 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 
 	return (
 		<>
-			<div className='flex min-h-screen w-full flex-col bg-muted/40'>
-				<div className='flex flex-col sm:gap-4 sm:py-4 sm:pl-14'>
-					<main className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
-						<Tabs defaultValue='all'>
-							<TabsContent value='all'>
-								<Card x-chunk='dashboard-06-chunk-0'>
+			<div className="flex min-h-screen w-full flex-col bg-muted/40">
+				<div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+					<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+						<Tabs defaultValue="all">
+							<TabsContent value="all">
+								<Card x-chunk="dashboard-06-chunk-0">
 									<CardHeader>
 										<CardTitle>Event Sessions</CardTitle>
 										<CardDescription>
@@ -83,11 +88,11 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 											<TableBody>
 												{sessions.map((session) => (
 													<TableRow key={session.code}>
-														<TableCell className='font-medium'>
+														<TableCell className="font-medium">
 															{session.name}
 														</TableCell>
 														<TableCell>
-															<Badge variant='outline'>{session.status}</Badge>
+															<Badge variant="outline">{session.status}</Badge>
 														</TableCell>
 														<TableCell>{session.description}</TableCell>
 														<TableCell>
@@ -96,8 +101,8 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 														<TableCell>{session.availableSeats}</TableCell>
 														<TableCell>
 															{session.status == "active" && (
-																		<RegisterCard session={session}></RegisterCard>
-																								)}
+																<RegisterCard session={session}></RegisterCard>
+															)}
 														</TableCell>
 													</TableRow>
 												))}

@@ -9,8 +9,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
+} from "./ui/dialog";
+import { Button } from "./ui/button";
 
 interface QRDialogProps {
 	registrationCode: string;
@@ -22,9 +22,9 @@ const QRDialog: React.FC<QRDialogProps> = ({ registrationCode }) => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant='outline'>Show QR Code</Button>
+				<Button variant="outline">Show QR Code</Button>
 			</DialogTrigger>
-			<DialogContent className='sm:max-w-[425px] mx-auto'>
+			<DialogContent className="sm:max-w-[425px] mx-auto">
 				<Image
 					text={registrationCode}
 					options={{

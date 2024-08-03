@@ -3,7 +3,7 @@
 import { EventRegistration } from "@/lib/types/eventRegistration";
 import { useAuth } from "./AuthProvider";
 import { useState, FormEvent } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/components/ui/button";
 import { EventSession } from "@/lib/types/eventSession";
 import { UserRoundPlus, UserRoundMinus } from "lucide-react";
 import {
@@ -14,10 +14,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+} from "@/app/components/ui/dialog";
+import { Input } from "@/app/components/ui/input";
+import { Label } from "@/app/components/ui/label";
+import { useToast } from "@/app/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 
 interface RegisterCardProps {

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/components/ui/button";
 import {
 	Form,
 	FormControl,
@@ -13,8 +13,8 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/app/components/ui/form";
+import { Input } from "@/app/components/ui/input";
 
 export default function Register() {
 	const router = useRouter();
@@ -53,7 +53,9 @@ export default function Register() {
 				const errorResult = await response.json();
 				console.log(errorResult);
 				if (errorResult.status === "ALREADY_EXISTS") {
-					setErrorMessage("User with your email/phone number already exists. Please log in!");
+					setErrorMessage(
+						"User with your email/phone number already exists. Please log in!"
+					);
 				} else {
 					setErrorMessage("Failed to register user. Please try again.");
 				}
@@ -67,27 +69,25 @@ export default function Register() {
 
 	return (
 		<>
-			<h1 className='text-5xl text-center font-extrabold mx-auto mt-8'>
+			<h1 className="text-5xl text-center font-extrabold mx-auto mt-8">
 				Register
 			</h1>
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className='w-1/2 p-10 mx-auto mt-8 border'
+					className="w-1/2 p-10 mx-auto mt-8 border"
 				>
 					{errorMessage && (
-						<div className='mb-4 text-red-500 text-center'>
-							{errorMessage}
-						</div>
+						<div className="mb-4 text-red-500 text-center">{errorMessage}</div>
 					)}
 					<FormField
 						control={form.control}
-						name='name'
+						name="name"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Full Name</FormLabel>
 								<FormControl>
-									<Input placeholder='John Doe' {...field} />
+									<Input placeholder="John Doe" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -95,12 +95,12 @@ export default function Register() {
 					/>
 					<FormField
 						control={form.control}
-						name='email'
+						name="email"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Email</FormLabel>
 								<FormControl>
-									<Input placeholder='agyasta1808@gmail.com' {...field} />
+									<Input placeholder="agyasta1808@gmail.com" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -108,12 +108,12 @@ export default function Register() {
 					/>
 					<FormField
 						control={form.control}
-						name='phoneNumber'
+						name="phoneNumber"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Phone Number</FormLabel>
 								<FormControl>
-									<Input type='tel' {...field} />
+									<Input type="tel" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -121,12 +121,12 @@ export default function Register() {
 					/>
 					<FormField
 						control={form.control}
-						name='password'
+						name="password"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Password</FormLabel>
 								<FormControl>
-									<Input type={showPassword ? 'text' : 'password'} {...field} />
+									<Input type={showPassword ? "text" : "password"} {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -142,7 +142,7 @@ export default function Register() {
 						/>
 						<label htmlFor="showPassword">Show Password</label>
 					</div>
-					<Button className='mt-4' type='submit'>
+					<Button className="mt-4" type="submit">
 						Submit
 					</Button>
 				</form>

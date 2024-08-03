@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import withAuth from "../../components/AuthWrapper";
-import { useAuth } from "../../components/AuthProvider";
+import withAuth from "../components/AuthWrapper";
+import { useAuth } from "../components/AuthProvider";
 import { useState } from "react";
-import { Badge } from "../../components/ui/badge";
-import QRDialog from "../../components/QRComponent";
+import { Badge } from "../components/ui/badge";
+import QRDialog from "../components/QRComponent";
 import {
 	Card,
 	CardContent,
@@ -13,7 +13,7 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
-} from "../../components/ui/card";
+} from "../components/ui/card";
 import {
 	Table,
 	TableBody,
@@ -22,9 +22,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "../../components/ui/table";
-import { Tabs, TabsContent } from "../../components/ui/tabs";
-import { Button } from "../../components/ui/button";
+} from "../components/ui/table";
+import { Tabs, TabsContent } from "../components/ui/tabs";
+import { Button } from "../components/ui/button";
 import { EventRegistration } from "@/lib/types/eventRegistration";
 
 function Registrations() {

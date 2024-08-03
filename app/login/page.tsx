@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button } from "../../components/ui/button";
+import { Button } from "../components/ui/button";
 import { useState } from "react";
-import { useAuth } from "../../components/AuthProvider";
+import { useAuth } from "../components/AuthProvider";
 import { signInSchema } from "../../lib/schemas/signInSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Input } from "../../components/ui/input";
+import { Input } from "../components/ui/input";
 import {
 	Form,
 	FormControl,
@@ -16,7 +16,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "../../components/ui/form";
+} from "../components/ui/form";
 
 export default function LogIn() {
 	const router = useRouter();
