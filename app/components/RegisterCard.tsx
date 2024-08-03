@@ -78,7 +78,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 
 		try {
 			const response = await fetch(
-				"http://localhost:8080/api/v1/events/registration",
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/registration`,
 				{
 					method: "POST",
 					headers: {
@@ -104,18 +104,40 @@ export function RegisterCard({ session }: RegisterCardProps) {
 				}, 3000); // Adjust the delay as needed (3000ms = 3 seconds)
 			} else {
 				if (response.status === 422) {
-					toast({
-						title: "Registration Failed",
-						description:
-							"There was an issue with your registration. Please check your input and try again.",
-						variant: "destructive",
-					});
+					const errorResult = await response.json();
+					const error = errorResult.errors?.find(
+						(err: any) =>
+							err.code === "INTERNAL_SERVER_ERROR" && err.field === "address"
+					);
+
+					if (error) {
+						toast({
+							title: "Registration Failed",
+							description: `There was an issue with your registration: ${error.message}`,
+							variant: "destructive",
+						});
+					} else {
+						toast({
+							title: "Registration Failed",
+							description:
+								"There was an issue with your registration. Please check your input and try again.",
+							variant: "destructive",
+						});
+					}
 				}
 				if (response.status === 403) {
 					toast({
 						title: "Registration Failed",
 						description:
 							"Sorry, there are no available seats for your request anymore.",
+						variant: "destructive",
+					});
+				}
+				if (response.status === 400) {
+					toast({
+						title: "Registration Failed",
+						description:
+							"Sorry, you have registered too much! (More than 4 persons).",
 						variant: "destructive",
 					});
 				}
@@ -148,7 +170,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 								className="col-span-3"
 								value={identifier}
 								onChange={(e) => setIdentifier(e.target.value)}
-								placeholder="This will be used to get your tickets."
+								placeholder="Please insert your email or phone number as identifier."
 							/>
 						</div>
 						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
