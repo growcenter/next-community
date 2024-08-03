@@ -4,6 +4,7 @@ import "./globals.css";
 import { NavHeader } from "../components/NavHeader";
 import { AuthProvider } from "../components/AuthProvider";
 import { Toaster } from "../components/ui/toaster";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +19,12 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang='en'>
+		<html lang="en">
 			<AuthProvider>
 				<body className={inter.className}>
 					<NavHeader>{children}</NavHeader>
-					<Toaster/>
+					<Toaster />
+					<Footer></Footer>
 				</body>
 			</AuthProvider>
 		</html>

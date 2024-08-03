@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import withAuth from "../../components/AuthWrapper";
-import { useAuth } from "../../components/AuthProvider";
+import withAuth from "@/components/AuthWrapper";
+import { useAuth } from "@/components/AuthProvider";
 import { Event } from "../../lib/types/event";
 import { useState, useEffect } from "react";
 import { Badge } from "../../components/ui/badge";
@@ -56,15 +56,15 @@ function Events() {
 
 	return (
 		<>
-			<div className='flex min-h-screen w-full flex-col bg-muted/40'>
-				<div className='flex flex-col sm:gap-4 sm:py-4 sm:pl-14'>
-					<main className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
-						<Tabs defaultValue='all'>
-							<TabsContent value='all'>
-								<Card x-chunk='dashboard-06-chunk-0'>
+			<div className="flex min-h-screen w-full flex-col bg-muted/40">
+				<div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+					<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+						<Tabs defaultValue="all">
+							<TabsContent value="all">
+								<Card x-chunk="dashboard-06-chunk-0">
 									<CardHeader>
 										<CardTitle>Events</CardTitle>
-										<CardDescription>Grow Community`&apos;`s Events</CardDescription>
+										<CardDescription>Grow Community Events</CardDescription>
 									</CardHeader>
 									<CardContent>
 										<Table>
@@ -73,7 +73,7 @@ function Events() {
 													<TableHead>Name</TableHead>
 													<TableHead>Status</TableHead>
 													<TableHead>Description</TableHead>
-													
+
 													<TableHead>Registration Time</TableHead>
 													<TableHead></TableHead>
 												</TableRow>
@@ -81,14 +81,14 @@ function Events() {
 											<TableBody>
 												{events.map((event) => (
 													<TableRow key={event.id}>
-														<TableCell className='font-medium'>
+														<TableCell className="font-medium">
 															{event.name}
 														</TableCell>
 														<TableCell>
-															<Badge variant='outline'>{event.status}</Badge>
+															<Badge variant="outline">{event.status}</Badge>
 														</TableCell>
 														<TableCell>{event.description}</TableCell>
-														
+
 														<TableCell>
 															{new Date(
 																event.openRegistration
@@ -100,10 +100,12 @@ function Events() {
 														</TableCell>
 														<TableCell>
 															{event.status == "active" && (
-															<Button onClick={() => handleSession(event.code)}>	
-																View
-															</Button>)}
-															
+																<Button
+																	onClick={() => handleSession(event.code)}
+																>
+																	View
+																</Button>
+															)}
 														</TableCell>
 													</TableRow>
 												))}
