@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "../components/AuthProvider";
+import { useAuth } from "./components/AuthProvider";
 
 export default function Home() {
 	const { isAuthenticated, login, logout } = useAuth();
@@ -10,16 +10,20 @@ export default function Home() {
 
 	return (
 		<>
-			<main>
-				<section className='sticky'>
-					<div className='max-w-lg px-4 pt-24 mx-auto text-left md:max-w-none md:text-center'>
-						<h1 className='font-extrabold leading-5 tracking-tight text-[#201515] sm:leading-none text-3xl sm:text-8xl'>
-							<span className='inline md:block'>Welcome to </span>
-							<span className='relative mt-2 bg-clip-text text-[#201515] md:inline-block'>
+			<main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+				<section className="sticky w-full">
+					<div className="max-w-lg px-4 pt-24 mx-auto  md:max-w-none text-center">
+						<h1 className="font-extrabold leading-tight tracking-tight text-[#201515] sm:leading-none text-3xl sm:text-6xl">
+							<span className="block md:inline">Welcome to </span>
+							<span className="relative mt-2 bg-clip-text text-[#201515] md:inline-block">
 								GROW.
 							</span>
 						</h1>
-						{isAuthenticated && userData && <div></div>}
+						{isAuthenticated && userData && (
+							<div className="mt-4 text-center">
+								<p className="text-lg">Shalom, {userData.name}!</p>
+							</div>
+						)}
 					</div>
 				</section>
 			</main>
