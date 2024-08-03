@@ -104,26 +104,11 @@ export function RegisterCard({ session }: RegisterCardProps) {
 				}, 3000); // Adjust the delay as needed (3000ms = 3 seconds)
 			} else {
 				if (response.status === 422) {
-					const errorResult = await response.json();
-					const error = errorResult.errors?.find(
-						(err: any) =>
-							err.code === "INTERNAL_SERVER_ERROR" && err.field === "address"
-					);
-
-					if (error) {
-						toast({
-							title: "Registration Failed",
-							description: `There was an issue with your registration: ${error.message}`,
-							variant: "destructive",
-						});
-					} else {
-						toast({
-							title: "Registration Failed",
-							description:
-								"There was an issue with your registration. Please check your input and try again.",
-							variant: "destructive",
-						});
-					}
+					toast({
+						title: "Registration Failed",
+						description: "There was an issue with your registration.",
+						variant: "destructive",
+					});
 				}
 				if (response.status === 403) {
 					toast({
@@ -193,6 +178,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 								className="col-span-3"
 								value={address}
 								onChange={(e) => setAddress(e.target.value)}
+								placeholder="Input a minimum of 15 characters."
 							/>
 						</div>
 						{additionalInputs.map((input, index) => (
@@ -219,7 +205,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 										}
 									/>
 								</div>
-								<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
+								<div className="grid grid-cols-4 items-center gap-3 sm:gap-4">
 									<Label
 										htmlFor={`additional-address${index}`}
 										className="text-right"
@@ -230,6 +216,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 										id={`additional-address${index}`}
 										className="col-span-3"
 										value={input.address}
+										placeholder="Input a minimum of 15 characters."
 										onChange={(e) =>
 											setAdditionalInputs(
 												additionalInputs.map((input, i) =>
