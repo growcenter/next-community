@@ -78,7 +78,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 
 		try {
 			const response = await fetch(
-				"http://localhost:8080/api/v1/events/registration",
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/registration`,
 				{
 					method: "POST",
 					headers: {
