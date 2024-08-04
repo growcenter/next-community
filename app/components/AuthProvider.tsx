@@ -68,7 +68,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 		localStorage.removeItem("userData");
 		setIsAuthenticated(false);
 		router.push("/login"); // Redirect to login page or any other page
-		alert("Your session has expired. Please log in again.");
 	};
 
 	const login = (data: any) => {
