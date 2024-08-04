@@ -25,7 +25,7 @@ interface RegisterCardProps {
 }
 
 export function RegisterCard({ session }: RegisterCardProps) {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
@@ -38,18 +38,24 @@ export function RegisterCard({ session }: RegisterCardProps) {
 	>([]);
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+	const [addressError, setAddressError] = useState<string | null>(null);
+	const [additionalAddressErrors, setAdditionalAddressErrors] = useState<
+		string[]
+	>([]);
 	const { toast } = useToast();
 	const router = useRouter();
 
 	const addInput = () => {
 		if (additionalInputs.length < 3) {
 			setAdditionalInputs([...additionalInputs, { name: "", address: "" }]);
+			setAdditionalAddressErrors([...additionalAddressErrors, ""]);
 		}
 	};
 
 	const removeInput = () => {
 		if (additionalInputs.length > 0) {
 			setAdditionalInputs(additionalInputs.slice(0, -1));
+			setAdditionalAddressErrors(additionalAddressErrors.slice(0, -1));
 		}
 	};
 
@@ -60,12 +66,61 @@ export function RegisterCard({ session }: RegisterCardProps) {
 			setName("");
 			setAddress("");
 			setAdditionalInputs([]);
+			setAddressError(null);
+			setAdditionalAddressErrors([]);
 		}
+	};
+
+	const validateAddress = (address: string) => {
+		if (address.trim().length < 15) {
+			return "Address must be at least 15 characters long.";
+		} else {
+			return null;
+		}
+	};
+
+	const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newAddress = e.target.value;
+		setAddress(newAddress);
+		setAddressError(validateAddress(newAddress));
+	};
+
+	const handleAdditionalAddressChange = (
+		index: number,
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const newAddress = e.target.value;
+		const updatedInputs = [...additionalInputs];
+		updatedInputs[index].address = newAddress;
+		setAdditionalInputs(updatedInputs);
+
+		const error = validateAddress(newAddress);
+		const updatedErrors = [...additionalAddressErrors];
+		updatedErrors[index] = error || "";
+		setAdditionalAddressErrors(updatedErrors);
 	};
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
 		setIsSubmitting(true);
+
+		// Validate main address
+		if (address.trim().length < 15) {
+			setAddressError("Address must be at least 15 characters long.");
+		} else {
+			setAddressError(null);
+		}
+
+		// Validate additional addresses
+		const errors = additionalInputs.map(
+			(input) => validateAddress(input.address) || "" // Convert null to empty string
+		);
+		setAdditionalAddressErrors(errors);
+
+		if (address.trim().length < 15 || errors.some((error) => error !== "")) {
+			setIsSubmitting(false);
+			return;
+		}
 
 		const token = userData?.token;
 
@@ -95,8 +150,6 @@ export function RegisterCard({ session }: RegisterCardProps) {
 				}
 			);
 
-			const result = await response.json();
-
 			if (response.ok) {
 				toast({
 					title: "Registration Successful",
@@ -108,6 +161,10 @@ export function RegisterCard({ session }: RegisterCardProps) {
 					router.push("/");
 				}, 3000); // Adjust the delay as needed (3000ms = 3 seconds)
 			} else {
+				if (response.status === 401) {
+					handleExpiredToken();
+					return; // Exit function after handling expired token
+				}
 				if (response.status === 422) {
 					toast({
 						title: "Registration Failed",
@@ -150,24 +207,31 @@ export function RegisterCard({ session }: RegisterCardProps) {
 						<DialogTitle>{session.name}</DialogTitle>
 						<DialogDescription>
 							{new Date(session.time).toLocaleString()}
+							<p className="text-sm text-red-500 mt-2 font-bold">
+								All fields are required.
+							</p>
+							<p className="text-sm text-red-500 mt-2 font-bold">
+								One identifier can only register three additional people at
+								most.
+							</p>
 						</DialogDescription>
 					</DialogHeader>
 					<div className="grid gap-2 sm:gap-4 py-2 sm:py-4">
 						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 							<Label htmlFor="identifier" className="text-right">
-								Identifier
+								Identifier <span className="text-red-500">*</span>
 							</Label>
 							<Input
 								id="identifier"
 								className="col-span-3"
 								value={identifier}
 								onChange={(e) => setIdentifier(e.target.value)}
-								placeholder="Insert your email or phonenumber as identifier."
+								placeholder="Insert your email or phone number."
 							/>
 						</div>
 						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 							<Label htmlFor="name" className="text-right">
-								Name
+								Name <span className="text-red-500">*</span>
 							</Label>
 							<Input
 								id="name"
@@ -178,15 +242,20 @@ export function RegisterCard({ session }: RegisterCardProps) {
 						</div>
 						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
 							<Label htmlFor="address" className="text-right">
-								Address
+								Address <span className="text-red-500">*</span>
 							</Label>
 							<Input
 								id="address"
 								className="col-span-3"
 								value={address}
-								onChange={(e) => setAddress(e.target.value)}
+								onChange={handleAddressChange}
 								placeholder="Input a minimum of 15 characters."
 							/>
+							{addressError && (
+								<p className="text-red-500 text-sm col-span-4">
+									{addressError}
+								</p>
+							)}
 						</div>
 						{additionalInputs.map((input, index) => (
 							<div key={index} className="grid gap-2 sm:gap-4">
@@ -195,7 +264,8 @@ export function RegisterCard({ session }: RegisterCardProps) {
 										htmlFor={`additional-name${index}`}
 										className="text-right"
 									>
-										Additional Person {index + 1} Name
+										Additional Person {index + 1} Name{" "}
+										<span className="text-red-500">*</span>
 									</Label>
 									<Input
 										id={`additional-name${index}`}
@@ -217,23 +287,21 @@ export function RegisterCard({ session }: RegisterCardProps) {
 										htmlFor={`additional-address${index}`}
 										className="text-right"
 									>
-										Additional Person {index + 1} Address
+										Additional Person {index + 1} Address{" "}
+										<span className="text-red-500">*</span>
 									</Label>
 									<Input
 										id={`additional-address${index}`}
 										className="col-span-3"
 										value={input.address}
 										placeholder="Input a minimum of 15 characters."
-										onChange={(e) =>
-											setAdditionalInputs(
-												additionalInputs.map((input, i) =>
-													i === index
-														? { ...input, address: e.target.value }
-														: input
-												)
-											)
-										}
+										onChange={(e) => handleAdditionalAddressChange(index, e)}
 									/>
+									{additionalAddressErrors[index] && (
+										<p className="text-red-500 text-sm col-span-4">
+											{additionalAddressErrors[index]}
+										</p>
+									)}
 								</div>
 							</div>
 						))}

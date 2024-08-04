@@ -35,7 +35,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogDescription,
-	DialogTrigger,
 	DialogFooter,
 } from "../../components/ui/dialog";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
@@ -48,7 +47,7 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(true); // Add loading state
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
@@ -71,8 +70,13 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 						},
 					}
 				);
-				const data = await response.json();
-				setSessions(data.data);
+
+				if (response.status === 401) {
+					handleExpiredToken();
+				} else {
+					const data = await response.json();
+					setSessions(data.data);
+				}
 			} catch (error) {
 				console.error("Failed to fetch sessions:", error);
 			} finally {

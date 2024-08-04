@@ -33,6 +33,7 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { EventRegistration } from "@/lib/types/eventRegistration";
 import QRDialog from "../components/QRComponent";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 // Spinner component
 const Spinner = () => (
@@ -50,10 +51,12 @@ function Registrations() {
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false); // Added loading state
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
+
+	const router = useRouter(); // Initialize useRouter
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -88,6 +91,13 @@ function Registrations() {
 					},
 				}
 			);
+
+			if (response.status === 401) {
+				// Handle expired token
+				handleExpiredToken();
+				return;
+			}
+
 			const data = await response.json();
 			setRegistrations(data.data);
 		} catch (error) {
@@ -153,6 +163,12 @@ function Registrations() {
 					},
 				}
 			);
+
+			if (response.status === 401) {
+				handleExpiredToken();
+				return;
+			}
+
 			if (response.ok) {
 				setRegistrations((prev) => prev.filter((reg) => reg.code !== code));
 				alert("Registration deleted successfully.");

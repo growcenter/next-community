@@ -45,7 +45,7 @@ function Events() {
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(true); // Add loading state
-	const { isAuthenticated, login, logout } = useAuth();
+	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
@@ -72,6 +72,10 @@ function Events() {
 						},
 					}
 				);
+				if (response.status === 401) {
+					handleExpiredToken();
+					return;
+				}
 				const data = await response.json();
 				setEvents(data.data);
 			} catch (error) {
