@@ -38,6 +38,7 @@ import {
 	DialogTrigger,
 	DialogFooter,
 } from "../../components/ui/dialog";
+import { LoadingSpinner } from "../../components/ui/loading-spinner";
 
 function EventSessions({ params }: { params: { eventCode: string } }) {
 	const [sessions, setSessions] = useState<EventSession[]>([]);
@@ -46,6 +47,7 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 	);
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(true); // Add loading state
 	const { isAuthenticated } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
@@ -56,18 +58,26 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 		async function fetchSessions() {
 			if (!userData?.token || !params.eventCode) return;
 
-			const response = await fetch(
-				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/${params.eventCode}/sessions`,
-				{
-					headers: {
-						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${userData.token}`,
-					},
-				}
-			);
-			const data = await response.json();
-			setSessions(data.data);
+			setIsLoading(true); // Set loading to true before fetching
+
+			try {
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/${params.eventCode}/sessions`,
+					{
+						headers: {
+							"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${userData.token}`,
+						},
+					}
+				);
+				const data = await response.json();
+				setSessions(data.data);
+			} catch (error) {
+				console.error("Failed to fetch sessions:", error);
+			} finally {
+				setIsLoading(false); // Set loading to false after fetching
+			}
 		}
 
 		fetchSessions();
@@ -112,65 +122,73 @@ function EventSessions({ params }: { params: { eventCode: string } }) {
 										</CardDescription>
 									</CardHeader>
 									<CardContent>
-										<div className="overflow-x-auto">
-											<Table className="min-w-full">
-												<TableHeader>
-													<TableRow>
-														<TableHead>Session Name</TableHead>
-														<TableHead>Status</TableHead>
-														<TableHead className="hidden sm:table-cell">
-															Description
-														</TableHead>
-														<TableHead className="hidden sm:table-cell">
-															Time
-														</TableHead>
-														<TableHead className="hidden sm:table-cell">
-															Available Seats
-														</TableHead>
-														<TableHead></TableHead>
-													</TableRow>
-												</TableHeader>
-												<TableBody>
-													{sessions.map((session) => (
-														<TableRow key={session.code}>
-															<TableCell className="font-medium">
-																{isSmallScreen ? (
-																	<button
-																		onClick={() => handleSessionClick(session)}
-																		className="text-blue-500 underline sm:no-underline"
-																	>
-																		{session.name}
-																	</button>
-																) : (
-																	session.name
-																)}
-															</TableCell>
-															<TableCell>
-																<Badge variant="outline">
-																	{session.status}
-																</Badge>
-															</TableCell>
-															<TableCell className="hidden sm:table-cell">
-																{session.description}
-															</TableCell>
-															<TableCell className="hidden sm:table-cell">
-																{new Date(session.time).toLocaleString()}
-															</TableCell>
-															<TableCell className="hidden sm:table-cell">
-																{session.availableSeats}
-															</TableCell>
-															<TableCell>
-																{session.status === "active" && (
-																	<RegisterCard
-																		session={session}
-																	></RegisterCard>
-																)}
-															</TableCell>
+										{isLoading ? ( // Display spinner while loading
+											<div className="flex justify-center items-center h-64">
+												<LoadingSpinner />
+											</div>
+										) : (
+											<div className="overflow-x-auto">
+												<Table className="min-w-full">
+													<TableHeader>
+														<TableRow>
+															<TableHead>Session Name</TableHead>
+															<TableHead>Status</TableHead>
+															<TableHead className="hidden sm:table-cell">
+																Description
+															</TableHead>
+															<TableHead className="hidden sm:table-cell">
+																Time
+															</TableHead>
+															<TableHead className="hidden sm:table-cell">
+																Available Seats
+															</TableHead>
+															<TableHead></TableHead>
 														</TableRow>
-													))}
-												</TableBody>
-											</Table>
-										</div>
+													</TableHeader>
+													<TableBody>
+														{sessions.map((session) => (
+															<TableRow key={session.code}>
+																<TableCell className="font-medium">
+																	{isSmallScreen ? (
+																		<button
+																			onClick={() =>
+																				handleSessionClick(session)
+																			}
+																			className="text-blue-500 underline sm:no-underline"
+																		>
+																			{session.name}
+																		</button>
+																	) : (
+																		session.name
+																	)}
+																</TableCell>
+																<TableCell>
+																	<Badge variant="outline">
+																		{session.status}
+																	</Badge>
+																</TableCell>
+																<TableCell className="hidden sm:table-cell">
+																	{session.description}
+																</TableCell>
+																<TableCell className="hidden sm:table-cell">
+																	{new Date(session.time).toLocaleString()}
+																</TableCell>
+																<TableCell className="hidden sm:table-cell">
+																	{session.availableSeats}
+																</TableCell>
+																<TableCell>
+																	{session.status === "active" && (
+																		<RegisterCard
+																			session={session}
+																		></RegisterCard>
+																	)}
+																</TableCell>
+															</TableRow>
+														))}
+													</TableBody>
+												</Table>
+											</div>
+										)}
 										{selectedSession && (
 											<Dialog
 												open={isDialogOpen}
