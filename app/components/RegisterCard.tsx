@@ -162,7 +162,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 								className="col-span-3"
 								value={identifier}
 								onChange={(e) => setIdentifier(e.target.value)}
-								placeholder="Insert your email or phonenumber as identifier."
+								placeholder="Insert your email as identifier."
 							/>
 						</div>
 						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
