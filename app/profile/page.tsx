@@ -34,6 +34,13 @@ import { Label } from "@radix-ui/react-label";
 import { EventRegistration } from "@/lib/types/eventRegistration";
 import QRDialog from "../components/QRComponent";
 
+// Spinner component
+const Spinner = () => (
+	<div className="flex justify-center items-center">
+		<div className="w-8 h-8 border-4 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+	</div>
+);
+
 function Registrations() {
 	const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
 	const [identifier, setIdentifier] = useState<string>("");
@@ -42,6 +49,7 @@ function Registrations() {
 		useState<EventRegistration | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false); // Added loading state
 	const { isAuthenticated } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
@@ -63,6 +71,8 @@ function Registrations() {
 	const fetchRegistrations = async () => {
 		if (!userData?.token || !identifier) return;
 
+		setLoading(true); // Start loading
+
 		try {
 			const response = await fetch(
 				`${
@@ -82,6 +92,8 @@ function Registrations() {
 			setRegistrations(data.data);
 		} catch (error) {
 			console.error("Failed to fetch registrations:", error);
+		} finally {
+			setLoading(false); // Stop loading
 		}
 	};
 
@@ -195,94 +207,98 @@ function Registrations() {
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
-									{isSubmitted && (
-										<div className="overflow-x-auto">
-											<Table className="min-w-full">
-												<TableHeader>
-													<TableRow>
-														<TableHead className="text-sm text-center md:text-base p-0">
-															Name
-														</TableHead>
-														<TableHead className="hidden md:table-cell">
-															Event
-														</TableHead>
-														<TableHead className="hidden md:table-cell">
-															Session
-														</TableHead>
-														<TableHead className="hidden md:table-cell">
-															Status
-														</TableHead>
-														<TableHead className="text-sm  md:text-base text-center p-0">
-															QR
-														</TableHead>
-														<TableHead className="text-sm text-left md:text-base md:text-center">
-															Cancel
-														</TableHead>
-													</TableRow>
-												</TableHeader>
-												<TableBody>
-													{registrations.length === 0 ? (
+									{loading ? (
+										<Spinner /> // Show spinner while loading
+									) : (
+										isSubmitted && (
+											<div className="overflow-x-auto">
+												<Table className="min-w-full">
+													<TableHeader>
 														<TableRow>
-															<TableCell colSpan={6} className="text-center">
-																No registrations found.
-															</TableCell>
+															<TableHead className="text-sm text-center md:text-base p-0">
+																Name
+															</TableHead>
+															<TableHead className="hidden md:table-cell">
+																Event
+															</TableHead>
+															<TableHead className="hidden md:table-cell">
+																Session
+															</TableHead>
+															<TableHead className="hidden md:table-cell">
+																Status
+															</TableHead>
+															<TableHead className="text-sm  md:text-base text-center p-0">
+																QR
+															</TableHead>
+															<TableHead className="text-sm text-left md:text-base md:text-center">
+																Cancel
+															</TableHead>
 														</TableRow>
-													) : (
-														registrations.map((registration, index) => (
-															<TableRow
-																key={`${index}-main`}
-																className="cursor-pointer"
-															>
-																<TableCell className="text-xs md:text-base">
-																	{isSmallScreen ? (
-																		<button
-																			className="text-blue-500 underline sm:no-underline text-left"
-																			onClick={() =>
-																				handleRowClick(registration)
-																			}
-																		>
-																			{registration.name}
-																		</button>
-																	) : (
-																		registration.name
-																	)}
-																</TableCell>
-																<TableCell className="hidden md:table-cell">
-																	{registration.eventName}
-																</TableCell>
-																<TableCell className="hidden md:table-cell">
-																	{registration.sessionName}
-																</TableCell>
-																<TableCell className="hidden md:table-cell">
-																	<Badge variant="outline">
-																		{registration.status}
-																	</Badge>
-																</TableCell>
-																<TableCell>
-																	{registration.status === "registered" && (
-																		<QRDialog
-																			registrationCode={registration.code}
-																		/>
-																	)}
-																</TableCell>
-																<TableCell>
-																	{registration.status === "registered" && (
-																		<Button
-																			variant="destructive"
-																			onClick={() =>
-																				handleDelete(registration.code)
-																			}
-																		>
-																			<CircleX className="text-xs md:text-base"></CircleX>
-																		</Button>
-																	)}
+													</TableHeader>
+													<TableBody>
+														{registrations.length === 0 ? (
+															<TableRow>
+																<TableCell colSpan={6} className="text-center">
+																	No registrations found.
 																</TableCell>
 															</TableRow>
-														))
-													)}
-												</TableBody>
-											</Table>
-										</div>
+														) : (
+															registrations.map((registration, index) => (
+																<TableRow
+																	key={`${index}-main`}
+																	className="cursor-pointer"
+																>
+																	<TableCell className="text-xs md:text-base">
+																		{isSmallScreen ? (
+																			<button
+																				className="text-blue-500 underline sm:no-underline text-left"
+																				onClick={() =>
+																					handleRowClick(registration)
+																				}
+																			>
+																				{registration.name}
+																			</button>
+																		) : (
+																			registration.name
+																		)}
+																	</TableCell>
+																	<TableCell className="hidden md:table-cell">
+																		{registration.eventName}
+																	</TableCell>
+																	<TableCell className="hidden md:table-cell">
+																		{registration.sessionName}
+																	</TableCell>
+																	<TableCell className="hidden md:table-cell">
+																		<Badge variant="outline">
+																			{registration.status}
+																		</Badge>
+																	</TableCell>
+																	<TableCell>
+																		{registration.status === "registered" && (
+																			<QRDialog
+																				registrationCode={registration.code}
+																			/>
+																		)}
+																	</TableCell>
+																	<TableCell>
+																		{registration.status === "registered" && (
+																			<Button
+																				variant="destructive"
+																				onClick={() =>
+																					handleDelete(registration.code)
+																				}
+																			>
+																				<CircleX className="text-xs md:text-base"></CircleX>
+																			</Button>
+																		)}
+																	</TableCell>
+																</TableRow>
+															))
+														)}
+													</TableBody>
+												</Table>
+											</div>
+										)
 									)}
 								</CardContent>
 							</Card>

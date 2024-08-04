@@ -37,12 +37,14 @@ import {
 	DialogTrigger,
 	DialogFooter,
 } from "@/app/components/ui/dialog";
+import { LoadingSpinner } from "../components/ui/loading-spinner";
 
 function Events() {
 	const [events, setEvents] = useState<Event[]>([]);
 	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(true); // Add loading state
 	const { isAuthenticated, login, logout } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
@@ -57,18 +59,26 @@ function Events() {
 		async function fetchEvents() {
 			if (!userData?.token) return;
 
-			const response = await fetch(
-				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events`,
-				{
-					headers: {
-						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${userData.token}`,
-					},
-				}
-			);
-			const data = await response.json();
-			setEvents(data.data);
+			setIsLoading(true); // Set loading to true before fetching
+
+			try {
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events`,
+					{
+						headers: {
+							"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${userData.token}`,
+						},
+					}
+				);
+				const data = await response.json();
+				setEvents(data.data);
+			} catch (error) {
+				console.error("Failed to fetch events:", error);
+			} finally {
+				setIsLoading(false); // Set loading to false after fetching
+			}
 		}
 
 		fetchEvents();
@@ -111,65 +121,73 @@ function Events() {
 										<CardDescription>Grow Community Events</CardDescription>
 									</CardHeader>
 									<CardContent>
-										<div className="overflow-x-auto">
-											<Table className="min-w-full">
-												<TableHeader>
-													<TableRow>
-														<TableHead>Name</TableHead>
-														<TableHead>Status</TableHead>
-														<TableHead className="hidden sm:table-cell">
-															Description
-														</TableHead>
-														<TableHead className="hidden sm:table-cell">
-															Registration Time
-														</TableHead>
-														<TableHead></TableHead>
-													</TableRow>
-												</TableHeader>
-												<TableBody>
-													{events.map((event) => (
-														<TableRow key={event.id}>
-															<TableCell className="font-medium">
-																{isSmallScreen ? (
-																	<button
-																		onClick={() => handleEventClick(event)}
-																		className="text-blue-500 underline sm:no-underline"
-																	>
-																		{event.name}
-																	</button>
-																) : (
-																	event.name
-																)}
-															</TableCell>
-															<TableCell>
-																<Badge variant="outline">{event.status}</Badge>
-															</TableCell>
-															<TableCell className="hidden sm:table-cell">
-																{event.description}
-															</TableCell>
-															<TableCell className="hidden sm:table-cell">
-																{new Date(
-																	event.openRegistration
-																).toLocaleString()}{" "}
-																-{" "}
-																{new Date(
-																	event.closedRegistration
-																).toLocaleString()}
-															</TableCell>
-															<TableCell>
-																{event.status === "active" && (
-																	<Button
-																		onClick={() => handleSession(event.code)}
-																	>
-																		View
-																	</Button>
-																)}
-															</TableCell>
+										{isLoading ? ( // Display spinner while loading
+											<div className="flex justify-center items-center h-64">
+												<LoadingSpinner />
+											</div>
+										) : (
+											<div className="overflow-x-auto">
+												<Table className="min-w-full">
+													<TableHeader>
+														<TableRow>
+															<TableHead>Name</TableHead>
+															<TableHead>Status</TableHead>
+															<TableHead className="hidden sm:table-cell">
+																Description
+															</TableHead>
+															<TableHead className="hidden sm:table-cell">
+																Registration Time
+															</TableHead>
+															<TableHead></TableHead>
 														</TableRow>
-													))}
-												</TableBody>
-											</Table>
-										</div>
+													</TableHeader>
+													<TableBody>
+														{events.map((event) => (
+															<TableRow key={event.id}>
+																<TableCell className="font-medium">
+																	{isSmallScreen ? (
+																		<button
+																			onClick={() => handleEventClick(event)}
+																			className="text-blue-500 underline sm:no-underline"
+																		>
+																			{event.name}
+																		</button>
+																	) : (
+																		event.name
+																	)}
+																</TableCell>
+																<TableCell>
+																	<Badge variant="outline">
+																		{event.status}
+																	</Badge>
+																</TableCell>
+																<TableCell className="hidden sm:table-cell">
+																	{event.description}
+																</TableCell>
+																<TableCell className="hidden sm:table-cell">
+																	{new Date(
+																		event.openRegistration
+																	).toLocaleString()}{" "}
+																	-{" "}
+																	{new Date(
+																		event.closedRegistration
+																	).toLocaleString()}
+																</TableCell>
+																<TableCell>
+																	{event.status === "active" && (
+																		<Button
+																			onClick={() => handleSession(event.code)}
+																		>
+																			View
+																		</Button>
+																	)}
+																</TableCell>
+															</TableRow>
+														))}
+													</TableBody>
+												</Table>
+											</div>
+										)}
 										{selectedEvent && (
 											<Dialog
 												open={isDialogOpen}

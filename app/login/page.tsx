@@ -36,6 +36,7 @@ export default function LogIn() {
 	const [password, setNewPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false); // Added loading state for forgot password
 
 	const form = useForm<z.infer<typeof signInSchema>>({
 		resolver: zodResolver(signInSchema),
@@ -95,6 +96,8 @@ export default function LogIn() {
 			return;
 		}
 
+		setForgotPasswordLoading(true); // Start loading
+
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/event/user/forgot`,
@@ -113,12 +116,13 @@ export default function LogIn() {
 				router.push("/"); // Redirect to the main page
 			} else {
 				const errorResult = await response.json();
-
 				alert("Failed to reset password: " + errorResult.message);
 			}
 		} catch (error) {
 			alert("An error occurred. Please try again.");
 			console.error("An error occurred:", error);
+		} finally {
+			setForgotPasswordLoading(false); // Stop loading
 		}
 	};
 
@@ -180,7 +184,7 @@ export default function LogIn() {
 						{loading ? "Submitting..." : "Submit"}
 					</Button>
 					<Button
-						className="w-full mx-auto text-center py-2 mt-4  border-b-4 border-gray-700 "
+						className="w-full mx-auto text-center py-2 mt-4 border-b-4 border-gray-700"
 						type="button"
 						variant="outline"
 						onClick={() => setIsDialogOpen(true)}
@@ -256,8 +260,12 @@ export default function LogIn() {
 						</div>
 					</div>
 					<DialogFooter>
-						<Button className="my-4 md:my-0" onClick={handleResetPassword}>
-							Submit
+						<Button
+							className="my-4 md:my-0"
+							onClick={handleResetPassword}
+							disabled={forgotPasswordLoading} // Disable button when loading
+						>
+							{forgotPasswordLoading ? "Processing..." : "Submit"}
 						</Button>
 						<Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
 					</DialogFooter>
