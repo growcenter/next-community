@@ -3,9 +3,9 @@ import React from "react";
 
 const Footer: React.FC = () => {
 	return (
-		<div className=" bg-gray-800 text-white py-4 mt-10">
-			<div className="container mx-auto text-center">
-				<p className="text-sm">
+		<div className=" bg-gray-800 text-white py-8 mt-10">
+			<div className="mx-auto text-center">
+				<p className="text-xs md:text-sm">
 					For any issues or questions, please contact our{" "}
 					<a
 						href="https://www.instagram.com/growcenterchurch/"

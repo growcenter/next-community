@@ -4,6 +4,7 @@ import withAuth from "../components/AuthWrapper";
 import { useAuth } from "../components/AuthProvider";
 import { useState, useEffect } from "react";
 import { Badge } from "../components/ui/badge";
+import { CircleX } from "lucide-react";
 import {
 	Card,
 	CardContent,
@@ -161,17 +162,24 @@ function Registrations() {
 							placeholder="Enter Identifier"
 							value={identifier}
 							onChange={(e) => setIdentifier(e.target.value)}
-							className="border p-2 rounded-md text-sm"
+							className="w-1/2 md:w-full border p-2 rounded-md text-sm md:text-base"
 							onKeyDown={handleKeyDown}
 						/>
-						<Button className="ml-2" onClick={handleSearch}>
+						<Button
+							className="ml-2 text-xs md:text-base"
+							onClick={handleSearch}
+						>
 							Search
 						</Button>
-						<Button className="ml-2" onClick={handleClear} variant="outline">
+						<Button
+							className="ml-2 text-xs md:text-base"
+							onClick={handleClear}
+							variant="outline"
+						>
 							Clear
 						</Button>
 					</div>
-					<Label className="text-sm  text-center text-red-500 font-style : italic">
+					<Label className="text-xs md:text-base  text-left md:text-center text-red-500 font-style : italic">
 						*Please input your identifier : email or phone number (format:
 						081234567890)
 					</Label>
@@ -179,8 +187,12 @@ function Registrations() {
 						<TabsContent value="all">
 							<Card x-chunk="dashboard-06-chunk-0">
 								<CardHeader>
-									<CardTitle>Registrations</CardTitle>
-									<CardDescription>Your event registrations</CardDescription>
+									<CardTitle className="text-xs md:text-base text-center">
+										Registrations
+									</CardTitle>
+									<CardDescription className="text-xs md:text-base text-center">
+										Your event registrations
+									</CardDescription>
 								</CardHeader>
 								<CardContent>
 									{isSubmitted && (
@@ -188,7 +200,9 @@ function Registrations() {
 											<Table className="min-w-full">
 												<TableHeader>
 													<TableRow>
-														<TableHead>Name</TableHead>
+														<TableHead className="text-sm text-center md:text-base p-0">
+															Name
+														</TableHead>
 														<TableHead className="hidden md:table-cell">
 															Event
 														</TableHead>
@@ -198,8 +212,12 @@ function Registrations() {
 														<TableHead className="hidden md:table-cell">
 															Status
 														</TableHead>
-														<TableHead>QR</TableHead>
-														<TableHead>Actions</TableHead>
+														<TableHead className="text-sm  md:text-base text-center p-0">
+															QR
+														</TableHead>
+														<TableHead className="text-sm text-left md:text-base md:text-center">
+															Cancel
+														</TableHead>
 													</TableRow>
 												</TableHeader>
 												<TableBody>
@@ -215,10 +233,10 @@ function Registrations() {
 																key={`${index}-main`}
 																className="cursor-pointer"
 															>
-																<TableCell className="font-medium">
+																<TableCell className="text-xs md:text-base">
 																	{isSmallScreen ? (
 																		<button
-																			className="text-blue-500 underline sm:no-underline"
+																			className="text-blue-500 underline sm:no-underline text-left"
 																			onClick={() =>
 																				handleRowClick(registration)
 																			}
@@ -250,12 +268,12 @@ function Registrations() {
 																<TableCell>
 																	{registration.status === "registered" && (
 																		<Button
-																			variant="outline"
+																			variant="destructive"
 																			onClick={() =>
 																				handleDelete(registration.code)
 																			}
 																		>
-																			❌
+																			<CircleX className="text-xs md:text-base"></CircleX>
 																		</Button>
 																	)}
 																</TableCell>
