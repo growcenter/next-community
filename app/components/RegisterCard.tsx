@@ -25,7 +25,7 @@ interface RegisterCardProps {
 }
 
 export function RegisterCard({ session }: RegisterCardProps) {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
@@ -95,8 +95,6 @@ export function RegisterCard({ session }: RegisterCardProps) {
 				}
 			);
 
-			const result = await response.json();
-
 			if (response.ok) {
 				toast({
 					title: "Registration Successful",
@@ -108,6 +106,10 @@ export function RegisterCard({ session }: RegisterCardProps) {
 					router.push("/");
 				}, 3000); // Adjust the delay as needed (3000ms = 3 seconds)
 			} else {
+				if (response.status === 401) {
+					handleExpiredToken();
+					return; // Exit function after handling expired token
+				}
 				if (response.status === 422) {
 					toast({
 						title: "Registration Failed",
