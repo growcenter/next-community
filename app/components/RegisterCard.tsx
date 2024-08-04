@@ -70,12 +70,15 @@ export function RegisterCard({ session }: RegisterCardProps) {
 		const token = userData?.token;
 
 		const payload = {
-			name,
-			identifier,
-			address,
+			name: name.trim(),
+			identifier: identifier.trim(),
+			address: address.trim(),
 			eventCode: session.eventCode,
 			sessionCode: session.code,
-			otherRegister: additionalInputs,
+			otherRegister: additionalInputs.map((input) => ({
+				name: input.name.trim(),
+				address: input.address.trim(),
+			})),
 		};
 
 		try {
