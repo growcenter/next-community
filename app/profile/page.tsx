@@ -98,10 +98,12 @@ function Registrations() {
 	};
 
 	const handleSearch = () => {
-		if (!identifier || !isValidEmail(identifier)) {
+		const trimmedIdentifier = identifier.trim().toLowerCase();
+		if (!trimmedIdentifier || !isValidEmail(trimmedIdentifier)) {
 			alert("Please enter a valid email address.");
 			return;
 		}
+		setIdentifier(trimmedIdentifier);
 		setIsSubmitted(true);
 		fetchRegistrations();
 	};
@@ -173,7 +175,9 @@ function Registrations() {
 							type="text"
 							placeholder="Enter Identifier"
 							value={identifier}
-							onChange={(e) => setIdentifier(e.target.value)}
+							onChange={(e) =>
+								setIdentifier(e.target.value.trim().toLowerCase())
+							}
 							className="w-1/2 md:w-full border p-2 rounded-md text-sm md:text-base"
 							onKeyDown={handleKeyDown}
 						/>
