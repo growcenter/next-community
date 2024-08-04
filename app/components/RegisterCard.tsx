@@ -5,7 +5,7 @@ import { useAuth } from "./AuthProvider";
 import { useState, FormEvent } from "react";
 import { Button } from "@/app/components/ui/button";
 import { EventSession } from "@/lib/types/eventSession";
-import { UserRoundPlus, UserRoundMinus } from "lucide-react";
+import { SquarePlus, SquareMinus } from "lucide-react";
 import {
 	Dialog,
 	DialogContent,
@@ -37,6 +37,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 		{ name: string; address: string }[]
 	>([]);
 	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 	const { toast } = useToast();
 	const router = useRouter();
 
@@ -64,6 +65,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
+		setIsSubmitting(true);
 
 		const token = userData?.token;
 
@@ -129,6 +131,8 @@ export function RegisterCard({ session }: RegisterCardProps) {
 			}
 		} catch (error) {
 			console.error("An error occurred:", error);
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -137,7 +141,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 			<DialogTrigger asChild>
 				<Button variant="outline">Register</Button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px] max-w-full px-2 py-2 sm:px-4 sm:py-4 overflow-y-scroll max-h-screen">
+			<DialogContent className="sm:max-w-[425px] max-w-full px-2 py-4 mt-2 sm:px-4 sm:py-4 overflow-y-scroll max-h-screen">
 				<form onSubmit={handleSubmit}>
 					<DialogHeader>
 						<DialogTitle>{session.name}</DialogTitle>
@@ -155,7 +159,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 								className="col-span-3"
 								value={identifier}
 								onChange={(e) => setIdentifier(e.target.value)}
-								placeholder="Please insert your email or phone number as identifier."
+								placeholder="Insert your email or phonenumber as identifier."
 							/>
 						</div>
 						<div className="grid grid-cols-4 items-center gap-2 sm:gap-4">
@@ -240,7 +244,7 @@ export function RegisterCard({ session }: RegisterCardProps) {
 									size="icon"
 									onClick={addInput}
 								>
-									<UserRoundPlus />
+									<SquarePlus />
 								</Button>
 							)}
 							{additionalInputs.length > 0 && (
@@ -250,11 +254,17 @@ export function RegisterCard({ session }: RegisterCardProps) {
 									size="icon"
 									onClick={removeInput}
 								>
-									<UserRoundMinus />
+									<SquareMinus />
 								</Button>
 							)}
 						</div>
-						<Button type="submit">Confirm Registration</Button>
+						<Button
+							type="submit"
+							className="w-3/4 my-3 mx-auto"
+							disabled={isSubmitting}
+						>
+							{isSubmitting ? "Submitting..." : "Confirm Registration"}
+						</Button>
 					</DialogFooter>
 				</form>
 			</DialogContent>

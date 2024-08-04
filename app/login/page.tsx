@@ -35,6 +35,7 @@ export default function LogIn() {
 	const [identifier, setIdentifier] = useState("");
 	const [password, setNewPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const form = useForm<z.infer<typeof signInSchema>>({
 		resolver: zodResolver(signInSchema),
@@ -42,7 +43,11 @@ export default function LogIn() {
 
 	async function onSubmit(values: z.infer<typeof signInSchema>) {
 		setErrorMessage(null); // Reset error message
-
+		setLoading(true); // Disable the button
+		values.identifier = values.identifier
+			.trim()
+			.replace(/\s+/g, "")
+			.toLowerCase();
 		try {
 			const response = await fetch(
 				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/event/user/login`,
@@ -74,6 +79,8 @@ export default function LogIn() {
 		} catch (error) {
 			setErrorMessage("An error occurred. Please try again.");
 			console.error("An error occurred:", error);
+		} finally {
+			setLoading(false);
 		}
 	}
 
@@ -123,7 +130,7 @@ export default function LogIn() {
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className="w-full max-w-md p-6 mx-auto mt-8 border rounded-lg shadow-md bg-white"
+					className="w-full md:w-1/2 p-8 mx-auto my-5 text-sm border rounded-lg shadow-md bg-white"
 				>
 					{errorMessage && (
 						<div className="mb-4 text-red-500 text-center">{errorMessage}</div>
@@ -132,7 +139,7 @@ export default function LogIn() {
 						control={form.control}
 						name="identifier"
 						render={({ field }) => (
-							<FormItem>
+							<FormItem className="text-xs md:text-base">
 								<FormLabel>Enter your email or phone number</FormLabel>
 								<FormControl>
 									<Input
@@ -163,15 +170,17 @@ export default function LogIn() {
 							type="checkbox"
 							checked={showPassword}
 							onChange={() => setShowPassword(!showPassword)}
-							className="mr-2"
+							className="mt-3"
 						/>
-						<label htmlFor="showPassword">Show Password</label>
+						<label className="mt-3 ml-1" htmlFor="showPassword">
+							Show Password
+						</label>
 					</div>
-					<Button className="w-full py-2" type="submit">
-						Submit
+					<Button className="w-full py-2" type="submit" disabled={loading}>
+						{loading ? "Submitting..." : "Submit"}
 					</Button>
 					<Button
-						className="w-full mx-auto text-center py-2 mt-4"
+						className="w-full mx-auto text-center py-2 mt-4  border-b-4 border-gray-700 "
 						type="button"
 						variant="outline"
 						onClick={() => setIsDialogOpen(true)}
@@ -200,7 +209,9 @@ export default function LogIn() {
 								id="identifier"
 								placeholder="Enter your email or phone number"
 								value={identifier}
-								onChange={(e) => setIdentifier(e.target.value)}
+								onChange={(e) =>
+									setIdentifier(e.target.value.trim().toLowerCase())
+								}
 							/>
 						</div>
 						<div>

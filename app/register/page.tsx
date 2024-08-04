@@ -21,6 +21,7 @@ export default function Register() {
 	const router = useRouter();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [showPassword, setShowPassword] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const form = useForm<z.infer<typeof userSchema>>({
 		resolver: zodResolver(userSchema),
@@ -32,6 +33,15 @@ export default function Register() {
 
 	async function onSubmit(values: z.infer<typeof userSchema>) {
 		setErrorMessage(null); // Reset error message
+		setLoading(true); // Disable the button
+
+		// Preprocess the identifier
+		if (values.email) {
+			values.email = values.email.trim().replace(/\s+/g, "").toLowerCase();
+		}
+		if (values.phoneNumber) {
+			values.phoneNumber = values.phoneNumber.trim().replace(/\s+/g, "");
+		}
 
 		try {
 			const response = await fetch(
@@ -48,7 +58,6 @@ export default function Register() {
 
 			if (response.ok) {
 				const result = await response.json();
-
 				router.push("/login");
 			} else {
 				const errorResult = await response.json();
@@ -65,6 +74,8 @@ export default function Register() {
 		} catch (error) {
 			setErrorMessage("An error occurred. Please try again.");
 			console.error("An error occurred:", error);
+		} finally {
+			setLoading(false); // Re-enable the button if needed
 		}
 	}
 
@@ -78,8 +89,8 @@ export default function Register() {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className="w-full max-w-md p-6 mx-auto mt-8 border rounded-lg shadow-md bg-white"
 				>
-					<Label className="text-sm  text-center text-red-500 font-style : italic">
-						*Please input at least an email or phone number (or both)
+					<Label className="text-xs  text-center text-red-500 font-style : italic">
+						*Please input both email and phone number.
 					</Label>
 					{errorMessage && (
 						<div className="mb-4 text-red-500 text-center">{errorMessage}</div>
@@ -150,8 +161,8 @@ export default function Register() {
 						/>
 						<label htmlFor="showPassword">Show Password</label>
 					</div>
-					<Button className="w-full py-2" type="submit">
-						Submit
+					<Button className="w-full py-2" type="submit" disabled={loading}>
+						{loading ? "Submitting..." : "Submit"}
 					</Button>
 				</form>
 			</Form>

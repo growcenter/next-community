@@ -22,9 +22,14 @@ const QRDialog: React.FC<QRDialogProps> = ({ registrationCode }) => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline">Show</Button>
+				<Button className="text-center " variant="outline">
+					Show
+				</Button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px] mx-auto overflow-y-scroll max-h-screen">
+			<DialogContent
+				aria-describedby="QR Code for the user's current registration"
+				className="sm:max-w-[425px] mx-auto overflow-y-scroll max-h-screen"
+			>
 				<Image
 					text={registrationCode}
 					options={{
