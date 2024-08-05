@@ -134,7 +134,7 @@ export default function LogIn() {
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className="w-full md:w-1/2 p-8 mx-auto my-5 text-sm border rounded-lg shadow-md bg-white"
+					className="w-full md:w-1/2 p-24 md:p-24 mx-auto my-5 text-sm border rounded-lg shadow-md bg-white"
 				>
 					{errorMessage && (
 						<div className="mb-4 text-red-500 text-center">{errorMessage}</div>

@@ -3,8 +3,8 @@ import React from "react";
 
 const Footer: React.FC = () => {
 	return (
-		<div className=" bg-gray-800 text-white py-8 mt-10">
-			<div className="mx-auto text-center">
+		<footer className="bg-gray-800 text-white p-5 mt-auto w-full">
+			<div className="container mx-auto text-center">
 				<p className="text-xs md:text-sm">
 					For any issues or questions, please contact our{" "}
 					<a
@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
 					.
 				</p>
 			</div>
-		</div>
+		</footer>
 	);
 };
 
