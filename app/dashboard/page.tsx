@@ -1,156 +1,237 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-import {
-	Calendar,
-	LucideQrCode,
-	Package,
-	Users,
-	LineChart,
-	Menu,
-	Search,
-} from "lucide-react";
+
+import { useRouter } from "next/navigation";
+import withAuth from "@/app/components/AuthWrapper";
+import { useAuth } from "@/app/components/AuthProvider";
+import { Event } from "../../lib/types/event";
+import { useState, useEffect } from "react";
 import { Badge } from "../components/ui/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../components/ui/card";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "../components/ui/table";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@/app/components/ui/tabs";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "../components/ui/sheet";
-import EventSummary from "../components/EventSummary";
-import VerifyTicketPage from "../components/VerifyTicketPage";
-import withAuth from "../components/AuthWrapper";
-import { QrCode } from "lucide-react";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+	DialogTrigger,
+	DialogFooter,
+} from "@/app/components/ui/dialog";
+import { LoadingSpinner } from "../components/ui/loading-spinner";
 
-// Dummy components for illustration
-const Events = () => <div>Events Component</div>;
-const Orders = () => <div>Orders Component</div>;
-const Products = () => <div>Products Component</div>;
-const Customers = () => <div>Customers Component</div>;
-const Analytics = () => <div>Analytics Component</div>;
+function EventsAdmin() {
+	const [events, setEvents] = useState<Event[]>([]);
+	const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+	const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+	const [isSmallScreen, setIsSmallScreen] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(true); // Add loading state
+	const { isAuthenticated, handleExpiredToken } = useAuth();
+	const userData = isAuthenticated
+		? JSON.parse(localStorage.getItem("userData") || "{}")
+		: null;
+	const router = useRouter();
 
-function Dashboard() {
-	const [selectedComponent, setSelectedComponent] = useState("Products");
+	function handleSession(code: string) {
+		return router.push(`/dashboard/${code}`);
+	}
 
-	const renderComponent = () => {
-		switch (selectedComponent) {
-			case "Events":
-				return <EventSummary />;
-			case "Scanner":
-				return <VerifyTicketPage />;
-			case "Products":
-				return <Products />;
-			case "Customers":
-				return <Customers />;
-			case "Analytics":
-				return <Analytics />;
-			default:
-				return <Products />;
+	useEffect(() => {
+		async function fetchEvents() {
+			if (!userData?.token) return;
+
+			setIsLoading(true); // Set loading to true before fetching
+
+			try {
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events`,
+					{
+						headers: {
+							"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${userData.token}`,
+						},
+					}
+				);
+				if (response.status === 401) {
+					handleExpiredToken();
+					return;
+				}
+				const data = await response.json();
+				setEvents(data.data);
+			} catch (error) {
+				console.error("Failed to fetch events:", error);
+			} finally {
+				setIsLoading(false); // Set loading to false after fetching
+			}
 		}
+
+		fetchEvents();
+	}, []);
+
+	// Detect screen size
+	useEffect(() => {
+		const handleResize = () => {
+			setIsSmallScreen(window.innerWidth <= 640); // Adjust the width as needed
+		};
+
+		handleResize(); // Initial check
+		window.addEventListener("resize", handleResize);
+
+		return () => {
+			window.removeEventListener("resize", handleResize);
+		};
+	}, []);
+
+	const handleEventClick = (event: Event) => {
+		setSelectedEvent(event);
+		setIsDialogOpen(true);
+	};
+
+	const handleDialogClose = () => {
+		setIsDialogOpen(false);
+		setSelectedEvent(null);
 	};
 
 	return (
-		<div className="mt-5 grid min-h-screen  h-full w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-			<div className="hidden border-r bg-muted/40 md:block">
-				<div className="flex h-full min-h-screen flex-col gap-2">
-					<div className="flex-1">
-						<nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-							<button
-								onClick={() => setSelectedComponent("Events")}
-								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-							>
-								<Calendar className="h-4 w-4" />
-								Events
-							</button>
-							<button
-								onClick={() => setSelectedComponent("Scanner")}
-								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-							>
-								<LucideQrCode className="h-4 w-4" />
-								Scanner
-							</button>
-							<button
-								onClick={() => setSelectedComponent("Products")}
-								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-							>
-								<Package className="h-4 w-4" />
-								Products
-							</button>
-							<button
-								onClick={() => setSelectedComponent("Customers")}
-								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-							>
-								<Users className="h-4 w-4" />
-								Customers
-							</button>
-							<button
-								onClick={() => setSelectedComponent("Analytics")}
-								className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-							>
-								<LineChart className="h-4 w-4" />
-								Analytics
-							</button>
-						</nav>
-					</div>
+		<>
+			<div className="flex min-h-screen w-full flex-col">
+				<div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+					<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+						<Tabs defaultValue="all">
+							<TabsContent value="all">
+								<Card x-chunk="dashboard-06-chunk-0">
+									<CardHeader>
+										<CardTitle>Admin Dashboard</CardTitle>
+										<CardDescription>
+											Grow Community Admin Panel
+										</CardDescription>
+									</CardHeader>
+									<CardContent>
+										{isLoading ? ( // Display spinner while loading
+											<div className="flex justify-center items-center h-64">
+												<LoadingSpinner />
+											</div>
+										) : (
+											<div className="overflow-x-auto">
+												<Table className="min-w-full">
+													<TableHeader>
+														<TableRow>
+															<TableHead>Event Name</TableHead>
+															<TableHead>Status</TableHead>
+															<TableHead className="hidden sm:table-cell">
+																Description
+															</TableHead>
+															<TableHead className="hidden sm:table-cell">
+																Registration Time
+															</TableHead>
+															<TableHead></TableHead>
+														</TableRow>
+													</TableHeader>
+													<TableBody>
+														{events.map((event) => (
+															<TableRow key={event.id}>
+																<TableCell className="font-medium">
+																	{isSmallScreen ? (
+																		<button
+																			onClick={() => handleEventClick(event)}
+																			className="text-blue-500 underline sm:no-underline"
+																		>
+																			{event.name}
+																		</button>
+																	) : (
+																		event.name
+																	)}
+																</TableCell>
+																<TableCell>
+																	<Badge variant="outline">
+																		{event.status}
+																	</Badge>
+																</TableCell>
+																<TableCell className="hidden sm:table-cell">
+																	{event.description}
+																</TableCell>
+																<TableCell className="hidden sm:table-cell">
+																	{new Date(
+																		event.openRegistration
+																	).toLocaleString()}{" "}
+																	-{" "}
+																	{new Date(
+																		event.closedRegistration
+																	).toLocaleString()}
+																</TableCell>
+																<TableCell>
+																	{event.status === "active" && (
+																		<Button
+																			onClick={() => handleSession(event.code)}
+																		>
+																			View
+																		</Button>
+																	)}
+																</TableCell>
+															</TableRow>
+														))}
+													</TableBody>
+												</Table>
+											</div>
+										)}
+										{selectedEvent && (
+											<Dialog
+												open={isDialogOpen}
+												onOpenChange={handleDialogClose}
+											>
+												<DialogContent className="sm:max-w-[425px] max-w-full py-2 sm:px-4 sm:py-4">
+													<DialogHeader>
+														<DialogTitle>{selectedEvent.name}</DialogTitle>
+														<DialogDescription>
+															{selectedEvent.status}
+														</DialogDescription>
+													</DialogHeader>
+													<p>{selectedEvent.description}</p>
+													<p>
+														Registration Time:{" "}
+														{new Date(
+															selectedEvent.openRegistration
+														).toLocaleString()}{" "}
+														-{" "}
+														{new Date(
+															selectedEvent.closedRegistration
+														).toLocaleString()}
+													</p>
+													<DialogFooter>
+														<Button onClick={handleDialogClose}>Close</Button>
+													</DialogFooter>
+												</DialogContent>
+											</Dialog>
+										)}
+									</CardContent>
+								</Card>
+							</TabsContent>
+						</Tabs>
+					</main>
 				</div>
 			</div>
-			<div className="flex flex-col">
-				<header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-					<Sheet>
-						<SheetTrigger asChild>
-							<Button
-								variant="outline"
-								size="icon"
-								className="shrink-0 md:hidden"
-							>
-								<Menu className="h-5 w-5" />
-								<span className="sr-only">Toggle navigation menu</span>
-							</Button>
-						</SheetTrigger>
-						<SheetContent side="left" className="flex flex-col">
-							<nav className="grid gap-2 text-lg font-medium">
-								<button
-									onClick={() => setSelectedComponent("Events")}
-									className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-								>
-									<Calendar className="h-5 w-5" />
-									Events
-								</button>
-								<button
-									onClick={() => setSelectedComponent("Scanner")}
-									className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-								>
-									<LucideQrCode className="h-5 w-5" />
-									Scanner
-								</button>
-								<button
-									onClick={() => setSelectedComponent("Products")}
-									className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-								>
-									<Package className="h-5 w-5" />
-									Products
-								</button>
-								<button
-									onClick={() => setSelectedComponent("Customers")}
-									className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-								>
-									<Users className="h-5 w-5" />
-									Customers
-								</button>
-								<button
-									onClick={() => setSelectedComponent("Analytics")}
-									className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-								>
-									<LineChart className="h-5 w-5" />
-									Analytics
-								</button>
-							</nav>
-						</SheetContent>
-					</Sheet>
-				</header>
-				<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-					{renderComponent()}
-				</main>
-			</div>
-		</div>
+		</>
 	);
 }
 
-export default withAuth(Dashboard);
+export default withAuth(EventsAdmin);

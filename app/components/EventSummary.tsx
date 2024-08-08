@@ -30,8 +30,13 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-export default function EventSummary() {
-	const [sessionData, setSessionData] = useState<any[]>([]);
+interface EventSummaryProps {
+	eventCode: string;
+}
+import { EventSession } from "../../lib/types/eventSession";
+
+export default function EventSummary({ eventCode }: EventSummaryProps) {
+	const [sessionData, setSessionData] = useState<EventSession[]>([]);
 	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
@@ -40,7 +45,7 @@ export default function EventSummary() {
 	useEffect(() => {
 		// Fetch API data
 		fetch(
-			`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/internal/events/registrations/E01/summary`,
+			`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/internal/events/registrations/${eventCode}/summary`,
 			{
 				method: "GET",
 				headers: {
@@ -57,7 +62,7 @@ export default function EventSummary() {
 			.catch((error) => {
 				console.error("Error fetching data:", error);
 			});
-	}, []);
+	}, [eventCode]);
 
 	const renderCharts = (session: any) => {
 		const totalSeatsData = [
@@ -75,10 +80,10 @@ export default function EventSummary() {
 		];
 
 		return (
-			<div className='flex flex-col md:flex-row gap-4'>
+			<div className="flex flex-col md:flex-row gap-4">
 				<ChartContainer
 					config={chartConfig}
-					className='mx-auto aspect-square max-h-[250px] flex-1'
+					className="mx-auto aspect-square max-h-[250px] flex-1"
 				>
 					<PieChart>
 						<ChartTooltip
@@ -87,8 +92,8 @@ export default function EventSummary() {
 						/>
 						<Pie
 							data={totalSeatsData}
-							dataKey='value'
-							nameKey='name'
+							dataKey="value"
+							nameKey="name"
 							innerRadius={60}
 							strokeWidth={5}
 						>
@@ -99,20 +104,20 @@ export default function EventSummary() {
 											<text
 												x={viewBox.cx}
 												y={viewBox.cy}
-												textAnchor='middle'
-												dominantBaseline='middle'
+												textAnchor="middle"
+												dominantBaseline="middle"
 											>
 												<tspan
 													x={viewBox.cx}
 													y={viewBox.cy}
-													className='fill-foreground text-3xl font-bold'
+													className="fill-foreground text-3xl font-bold"
 												>
 													{session.registeredSeats + session.availableSeats}
 												</tspan>
 												<tspan
 													x={viewBox.cx}
 													y={(viewBox.cy || 0) + 24}
-													className='fill-muted-foreground'
+													className="fill-muted-foreground"
 												>
 													Total Seats
 												</tspan>
@@ -126,7 +131,7 @@ export default function EventSummary() {
 				</ChartContainer>
 				<ChartContainer
 					config={chartConfig}
-					className='mx-auto aspect-square max-h-[250px] flex-1'
+					className="mx-auto aspect-square max-h-[250px] flex-1"
 				>
 					<PieChart>
 						<ChartTooltip
@@ -135,8 +140,8 @@ export default function EventSummary() {
 						/>
 						<Pie
 							data={scannedData}
-							dataKey='value'
-							nameKey='name'
+							dataKey="value"
+							nameKey="name"
 							innerRadius={60}
 							strokeWidth={5}
 						>
@@ -147,20 +152,20 @@ export default function EventSummary() {
 											<text
 												x={viewBox.cx}
 												y={viewBox.cy}
-												textAnchor='middle'
-												dominantBaseline='middle'
+												textAnchor="middle"
+												dominantBaseline="middle"
 											>
 												<tspan
 													x={viewBox.cx}
 													y={viewBox.cy}
-													className='fill-foreground text-3xl font-bold'
+													className="fill-foreground text-3xl font-bold"
 												>
 													{session.scannedSeats + session.unscannedSeats}
 												</tspan>
 												<tspan
 													x={viewBox.cx}
 													y={(viewBox.cy || 0) + 24}
-													className='fill-muted-foreground'
+													className="fill-muted-foreground"
 												>
 													Scanned Seats
 												</tspan>
@@ -177,21 +182,23 @@ export default function EventSummary() {
 	};
 
 	return (
-		<Accordion type='single' collapsible className='w-full'>
+		<Accordion type="single" collapsible className="w-full">
 			{sessionData.map((session) => (
 				<AccordionItem key={session.code} value={session.code}>
-					<AccordionTrigger>{session.name}</AccordionTrigger>
+					<AccordionTrigger>
+						{session.code} : {session.name}
+					</AccordionTrigger>
 					<AccordionContent>
-						<Card className='flex flex-col'>
-							<CardHeader className='items-center pb-0'>
+						<Card className="flex flex-col">
+							<CardHeader className="items-center pb-0">
 								<CardTitle>{session.name}</CardTitle>
 								<CardDescription>{session.description}</CardDescription>
 							</CardHeader>
-							<CardContent className='flex-1 pb-0'>
+							<CardContent className="flex-1 pb-0">
 								{renderCharts(session)}
 							</CardContent>
-							<CardFooter className='flex-col gap-2 text-sm'>
-								<div className='leading-none text-muted-foreground'>
+							<CardFooter className="flex-col gap-2 text-sm">
+								<div className="leading-none text-muted-foreground">
 									Showing data for total and scanned seats
 								</div>
 							</CardFooter>

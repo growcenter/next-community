@@ -50,15 +50,17 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 								{isAuthenticated ? (
 									<>
 										{userData.role === "admin" ? (
-											<NavigationMenuItem>
-												<Link href="/dashboard" legacyBehavior passHref>
-													<NavigationMenuLink
-														className={navigationMenuTriggerStyle()}
-													>
-														Dashboard
-													</NavigationMenuLink>
-												</Link>
-											</NavigationMenuItem>
+											<>
+												<NavigationMenuItem>
+													<Link href="/dashboard" legacyBehavior passHref>
+														<NavigationMenuLink
+															className={navigationMenuTriggerStyle()}
+														>
+															Dashboard
+														</NavigationMenuLink>
+													</Link>
+												</NavigationMenuItem>
+											</>
 										) : (
 											<>
 												<NavigationMenuItem>

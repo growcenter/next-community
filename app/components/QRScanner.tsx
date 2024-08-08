@@ -1,67 +1,71 @@
-import React, { useState, useEffect } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import React, { useState, useRef } from "react";
+import { Html5QrcodeScanner, Html5QrcodeResult } from "html5-qrcode";
 
-interface QRCodeScannerProps {
-	onScanSuccess: (decodedText: string) => void;
-}
+const QrCodeScanner: React.FC = () => {
+	const [isScanning, setIsScanning] = useState(false);
+	const html5QrCodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess }) => {
-	const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
-
-	useEffect(() => {
-		// Initialize the scanner only once
-		if (!scanner) {
-			const html5QrCodeScanner = new Html5QrcodeScanner(
-				"reader", // Use the id directly as a string
-				{ fps: 10, qrbox: 250 },
-				false
-			);
-
-			const onScanSuccessHandler = (decodedText: string) => {
-				onScanSuccess(decodedText);
-			};
-
-			const onScanFailure = (error: string) => {
-				console.warn(`QR code scan error: ${error}`);
-			};
-
-			html5QrCodeScanner.render(onScanSuccessHandler, onScanFailure);
-			setScanner(html5QrCodeScanner);
-		}
-
-		// Clean up the scanner when the component is unmounted or when scanner changes
-		return () => {
-			if (scanner) {
-				scanner.clear().catch((error) => {
-					console.error("Failed to clear html5QrCodeScanner:", error);
+	const onScanSuccess = (
+		decodedText: string,
+		decodedResult: Html5QrcodeResult
+	) => {
+		console.log(`Scan result: ${decodedText}`, decodedResult);
+		alert(`Scan result: ${decodedText}`);
+		// Stop scanning after a successful scan
+		if (html5QrCodeScannerRef.current) {
+			html5QrCodeScannerRef.current
+				.clear()
+				.then(() => {
+					html5QrCodeScannerRef.current = null;
+					setIsScanning(false);
+				})
+				.catch((err) => {
+					console.error("Failed to clear qr scanner", err);
 				});
-			}
-		};
-	}, [scanner, onScanSuccess]); // Depend on scanner to ensure initialization happens only once
+		}
+	};
 
-	const handleClearScanner = () => {
-		if (scanner) {
-			scanner.clear().catch((error) => {
-				console.error("Failed to clear html5QrCodeScanner:", error);
-			});
-			setScanner(null); // Reset scanner state
+	const onScanError = (errorMessage: string) => {
+		// Handle errors here
+	};
+
+	const startScanner = () => {
+		if (!html5QrCodeScannerRef.current) {
+			html5QrCodeScannerRef.current = new Html5QrcodeScanner(
+				"reader",
+				{ fps: 10, qrbox: 200 },
+				false // Disable verbose logging
+			);
+			html5QrCodeScannerRef.current.render(onScanSuccess, onScanError);
+			setIsScanning(true);
+		}
+	};
+
+	const clearScanner = () => {
+		if (html5QrCodeScannerRef.current) {
+			html5QrCodeScannerRef.current
+				.clear()
+				.then(() => {
+					html5QrCodeScannerRef.current = null;
+					setIsScanning(false);
+				})
+				.catch((err) => {
+					console.error("Failed to clear qr scanner", err);
+				});
 		}
 	};
 
 	return (
-		<div>
-			<div
-				id='reader'
-				className='w-full max-w-md h-64 border-2 border-gray-300 rounded-lg bg-gray-100 shadow-md'
-			></div>
-			<button
-				onClick={handleClearScanner}
-				className='mt-4 p-2 bg-red-500 text-white rounded'
-			>
+		<div className="w-full h-full mx-auto">
+			<div className="w-full h-[300px] sm:h-[500px]" id="reader"></div>
+			<button onClick={startScanner} disabled={isScanning}>
+				Start Scanner
+			</button>
+			<button onClick={clearScanner} disabled={!isScanning}>
 				Clear Scanner
 			</button>
 		</div>
 	);
 };
 
-export default QRCodeScanner;
+export default QrCodeScanner;
