@@ -47,26 +47,42 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 					<div className="hidden md:flex space-x-4">
 						<NavigationMenu>
 							<NavigationMenuList>
-								{isAuthenticated && userData.role == "user" ? (
+								{isAuthenticated ? (
 									<>
-										<NavigationMenuItem>
-											<Link href="/profile" legacyBehavior passHref>
-												<NavigationMenuLink
-													className={navigationMenuTriggerStyle()}
-												>
-													My Profile
-												</NavigationMenuLink>
-											</Link>
-										</NavigationMenuItem>
-										<NavigationMenuItem>
-											<Link href="/events" legacyBehavior passHref>
-												<NavigationMenuLink
-													className={navigationMenuTriggerStyle()}
-												>
-													Events
-												</NavigationMenuLink>
-											</Link>
-										</NavigationMenuItem>
+										{userData.role === "admin" ? (
+											<>
+												<NavigationMenuItem>
+													<Link href="/dashboard" legacyBehavior passHref>
+														<NavigationMenuLink
+															className={navigationMenuTriggerStyle()}
+														>
+															Dashboard
+														</NavigationMenuLink>
+													</Link>
+												</NavigationMenuItem>
+											</>
+										) : (
+											<>
+												<NavigationMenuItem>
+													<Link href="/profile" legacyBehavior passHref>
+														<NavigationMenuLink
+															className={navigationMenuTriggerStyle()}
+														>
+															My Profile
+														</NavigationMenuLink>
+													</Link>
+												</NavigationMenuItem>
+												<NavigationMenuItem>
+													<Link href="/events" legacyBehavior passHref>
+														<NavigationMenuLink
+															className={navigationMenuTriggerStyle()}
+														>
+															Events
+														</NavigationMenuLink>
+													</Link>
+												</NavigationMenuItem>
+											</>
+										)}
 										<NavigationMenuItem>
 											<Button onClick={handleLogout}>Logout</Button>
 										</NavigationMenuItem>
@@ -107,27 +123,41 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 				</div>
 				{isMobileMenuOpen && (
 					<NavigationMenu>
-						<NavigationMenuList className="md:hidden flex flex-row justify-evenly mb-3 ">
-							{isAuthenticated && userData.role == "user" ? (
+						<NavigationMenuList className="md:hidden flex flex-row justify-evenly mb-3">
+							{isAuthenticated ? (
 								<>
-									<NavigationMenuItem>
-										<Link href="/profile" legacyBehavior passHref>
-											<NavigationMenuLink
-												className={navigationMenuTriggerStyle()}
-											>
-												My Profile
-											</NavigationMenuLink>
-										</Link>
-									</NavigationMenuItem>
-									<NavigationMenuItem>
-										<Link href="/events" legacyBehavior passHref>
-											<NavigationMenuLink
-												className={navigationMenuTriggerStyle()}
-											>
-												Events
-											</NavigationMenuLink>
-										</Link>
-									</NavigationMenuItem>
+									{userData.role === "admin" ? (
+										<NavigationMenuItem>
+											<Link href="/dashboard" legacyBehavior passHref>
+												<NavigationMenuLink
+													className={navigationMenuTriggerStyle()}
+												>
+													Dashboard
+												</NavigationMenuLink>
+											</Link>
+										</NavigationMenuItem>
+									) : (
+										<>
+											<NavigationMenuItem>
+												<Link href="/profile" legacyBehavior passHref>
+													<NavigationMenuLink
+														className={navigationMenuTriggerStyle()}
+													>
+														My Profile
+													</NavigationMenuLink>
+												</Link>
+											</NavigationMenuItem>
+											<NavigationMenuItem>
+												<Link href="/events" legacyBehavior passHref>
+													<NavigationMenuLink
+														className={navigationMenuTriggerStyle()}
+													>
+														Events
+													</NavigationMenuLink>
+												</Link>
+											</NavigationMenuItem>
+										</>
+									)}
 									<NavigationMenuItem>
 										<Button onClick={handleLogout}>Logout</Button>
 									</NavigationMenuItem>

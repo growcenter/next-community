@@ -72,17 +72,13 @@ function Registrations() {
 	}, []);
 
 	const fetchRegistrations = async () => {
-		if (!userData?.token || !identifier) return;
+		if (!userData?.token) return;
 
 		setLoading(true); // Start loading
 
 		try {
 			const response = await fetch(
-				`${
-					process.env.NEXT_PUBLIC_API_BASE_URL
-				}/api/v1/events/registration?registeredBy=${encodeURIComponent(
-					identifier
-				)}`,
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/registration`,
 				{
 					headers: {
 						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
@@ -107,33 +103,9 @@ function Registrations() {
 		}
 	};
 
-	const handleSearch = () => {
-		const trimmedIdentifier = identifier.trim().toLowerCase();
-		if (!trimmedIdentifier || !isValidEmail(trimmedIdentifier)) {
-			alert("Please enter a valid email address.");
-			return;
-		}
-		setIdentifier(trimmedIdentifier);
-		setIsSubmitted(true);
+	useEffect(() => {
 		fetchRegistrations();
-	};
-
-	const isValidEmail = (email: string) => {
-		const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return re.test(email);
-	};
-
-	const handleClear = () => {
-		setIdentifier("");
-		setRegistrations([]);
-		setIsSubmitted(false);
-	};
-
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === "Enter") {
-			handleSearch();
-		}
-	};
+	}, []);
 
 	const handleRowClick = (registration: EventRegistration) => {
 		setSelectedRegistration(registration);
@@ -186,35 +158,6 @@ function Registrations() {
 		<div className="flex min-h-screen w-full flex-col bg-muted/40 overflow-scroll">
 			<div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
 				<main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-					<div className="mx-auto mt-4">
-						<input
-							type="text"
-							placeholder="Enter Identifier"
-							value={identifier}
-							onChange={(e) =>
-								setIdentifier(e.target.value.trim().toLowerCase())
-							}
-							className="w-1/2 md:w-full border p-2 rounded-md text-sm md:text-base"
-							onKeyDown={handleKeyDown}
-						/>
-						<Button
-							className="ml-2 text-xs md:text-base"
-							onClick={handleSearch}
-						>
-							Search
-						</Button>
-						<Button
-							className="ml-2 text-xs md:text-base"
-							onClick={handleClear}
-							variant="outline"
-						>
-							Clear
-						</Button>
-					</div>
-					<Label className="text-xs md:text-base  text-left md:text-center text-red-500 font-style : italic">
-						*Please input your identifier : email or phone number (format:
-						081234567890)
-					</Label>
 					<Tabs defaultValue="all">
 						<TabsContent value="all">
 							<Card x-chunk="dashboard-06-chunk-0">
@@ -230,95 +173,95 @@ function Registrations() {
 									{loading ? (
 										<Spinner /> // Show spinner while loading
 									) : (
-										isSubmitted && (
-											<div className="overflow-x-auto">
-												<Table className="min-w-full">
-													<TableHeader>
+										<div className="overflow-x-auto">
+											<Table className="min-w-full">
+												<TableHeader>
+													<TableRow>
+														<TableHead className="text-sm text-center md:text-base p-0">
+															Name
+														</TableHead>
+														<TableHead className="hidden md:table-cell">
+															Event
+														</TableHead>
+														<TableHead className="hidden md:table-cell">
+															Session
+														</TableHead>
+														<TableHead className="hidden md:table-cell">
+															Status
+														</TableHead>
+														<TableHead className="text-sm  md:text-base text-center p-0">
+															QR
+														</TableHead>
+														<TableHead className="text-sm text-left md:text-base md:text-center">
+															Cancel
+														</TableHead>
+													</TableRow>
+												</TableHeader>
+												<TableBody>
+													{registrations.length === 0 ? (
 														<TableRow>
-															<TableHead className="text-sm text-center md:text-base p-0">
-																Name
-															</TableHead>
-															<TableHead className="hidden md:table-cell">
-																Event
-															</TableHead>
-															<TableHead className="hidden md:table-cell">
-																Session
-															</TableHead>
-															<TableHead className="hidden md:table-cell">
-																Status
-															</TableHead>
-															<TableHead className="text-sm  md:text-base text-center p-0">
-																QR
-															</TableHead>
-															<TableHead className="text-sm text-left md:text-base md:text-center">
-																Cancel
-															</TableHead>
+															<TableCell colSpan={6} className="text-center">
+																No registrations found.
+															</TableCell>
 														</TableRow>
-													</TableHeader>
-													<TableBody>
-														{registrations.length === 0 ? (
-															<TableRow>
-																<TableCell colSpan={6} className="text-center">
-																	No registrations found.
+													) : (
+														registrations.map((registration, index) => (
+															<TableRow
+																key={`${index}-main`}
+																className="cursor-pointer"
+															>
+																<TableCell className="text-xs md:text-base">
+																	{isSmallScreen ? (
+																		<>
+																			<div className="inline sm:hidden text-sm mb-3">
+																				{registration.name}
+																			</div>
+																			<div className="inline sm:hidden text-xs">
+																				{" "}
+																				<span>Session : </span>{" "}
+																				{registration.sessionName}
+																			</div>
+																		</>
+																	) : (
+																		registration.name
+																	)}
+																</TableCell>
+																<TableCell className="hidden md:table-cell">
+																	{registration.eventName}
+																</TableCell>
+																<TableCell className="hidden md:table-cell">
+																	{registration.sessionName}
+																</TableCell>
+																<TableCell className="hidden md:table-cell">
+																	<Badge variant="outline">
+																		{registration.status}
+																	</Badge>
+																</TableCell>
+																<TableCell>
+																	{registration.status === "registered" && (
+																		<QRDialog
+																			registrationCode={registration.code}
+																		/>
+																	)}
+																</TableCell>
+																<TableCell>
+																	{registration.status === "registered" && (
+																		<Button
+																			variant="destructive"
+																			onClick={() =>
+																				handleDelete(registration.code)
+																			}
+																		>
+																			<CircleX className="text-xs md:text-base"></CircleX>
+																		</Button>
+																	)}
 																</TableCell>
 															</TableRow>
-														) : (
-															registrations.map((registration, index) => (
-																<TableRow
-																	key={`${index}-main`}
-																	className="cursor-pointer"
-																>
-																	<TableCell className="text-xs md:text-base">
-																		{isSmallScreen ? (
-																			<button
-																				className="text-blue-500 underline sm:no-underline text-left"
-																				onClick={() =>
-																					handleRowClick(registration)
-																				}
-																			>
-																				{registration.name}
-																			</button>
-																		) : (
-																			registration.name
-																		)}
-																	</TableCell>
-																	<TableCell className="hidden md:table-cell">
-																		{registration.eventName}
-																	</TableCell>
-																	<TableCell className="hidden md:table-cell">
-																		{registration.sessionName}
-																	</TableCell>
-																	<TableCell className="hidden md:table-cell">
-																		<Badge variant="outline">
-																			{registration.status}
-																		</Badge>
-																	</TableCell>
-																	<TableCell>
-																		{registration.status === "registered" && (
-																			<QRDialog
-																				registrationCode={registration.code}
-																			/>
-																		)}
-																	</TableCell>
-																	<TableCell>
-																		{registration.status === "registered" && (
-																			<Button
-																				variant="destructive"
-																				onClick={() =>
-																					handleDelete(registration.code)
-																				}
-																			>
-																				<CircleX className="text-xs md:text-base"></CircleX>
-																			</Button>
-																		)}
-																	</TableCell>
-																</TableRow>
-															))
-														)}
-													</TableBody>
-												</Table>
-											</div>
-										)
+														))
+													)}
+												</TableBody>
+											</Table>
+										</div>
 									)}
 								</CardContent>
 							</Card>

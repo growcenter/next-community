@@ -11,4 +11,5 @@ export interface EventRegistration {
 	sessionName: string;
 	status: string;
 	otherRegister?: { name: string; address: string }[];
+	registeredBy?: string;
 }
