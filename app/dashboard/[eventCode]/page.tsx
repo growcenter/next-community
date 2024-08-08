@@ -48,6 +48,7 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 	const [selectedSessionName, setSelectedSessionName] = useState<string | null>(
 		null
 	);
+
 	const [eventName, setEventName] = useState<string | null>(null);
 	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
@@ -194,6 +195,65 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 	const selectedSessionDetails = sessions.find(
 		(session) => session.code === selectedSession
 	);
+	const [scannedSeats, setScannedSeats] = useState<number>(
+		selectedSessionDetails?.scannedSeats || 0
+	);
+	useEffect(() => {
+		if (selectedSessionDetails) {
+			setScannedSeats(selectedSessionDetails.scannedSeats || 0);
+		}
+	}, [selectedSessionDetails]);
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === "Enter") {
+			handleSearch();
+		}
+	};
+
+	const handleManualVerify = async (code: string) => {
+		// Optimistically update the state
+		setRegistrations((prevRegistrations) =>
+			prevRegistrations.map((registration) =>
+				registration.code === code
+					? { ...registration, status: "verified" }
+					: registration
+			)
+		);
+		setScannedSeats((prevScannedSeats) => prevScannedSeats + 1);
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/internal/events/registrations/${code}`,
+				{
+					method: "PATCH",
+					headers: {
+						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${userData.token}`,
+					},
+					body: JSON.stringify({
+						status: "verified",
+						sessionCode: `${selectedSession}`,
+					}),
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error(`Error: ${response.statusText}`);
+			}
+
+			console.log("Success: Registration verified");
+		} catch (error) {
+			console.error("Error:", error);
+			// Rollback optimistic update in case of error
+			setRegistrations((prevRegistrations) =>
+				prevRegistrations.map((registration) =>
+					registration.code === code
+						? { ...registration, status: "pending" }
+						: registration
+				)
+			);
+			setScannedSeats((prevScannedSeats) => prevScannedSeats - 1);
+		}
+	};
 
 	return (
 		<main className="flex flex-col lg:flex-row w-full p-4 mb-10 sm:px-6 sm:py-0 mt-8 gap-4">
@@ -224,17 +284,35 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 				</Card>
 				{/* Registered and Scanned Cards */}
 				<Card className="text-center p-3">
-					<CardHeader className="pb-2">
-						<CardDescription className="text-xl">Registered: </CardDescription>
-						<CardTitle className="text-3xl">
-							{selectedSessionDetails?.registeredSeats || 0}
+					<CardHeader className="pb-2 text-center">
+						<CardDescription className="text-xl">
+							Current Session:
+						</CardDescription>
+						<CardTitle className="text-4xl">
+							{selectedSessionName || "None"}
 						</CardTitle>
 					</CardHeader>
 					<CardHeader className="pb-2">
-						<CardDescription className="text-lg">Scanned: </CardDescription>
+						<CardDescription className="text-xl">
+							Registered seats:{" "}
+						</CardDescription>
 						<CardTitle className="text-3xl">
-							{selectedSessionDetails?.scannedSeats || 0}
+							{selectedSessionDetails?.registeredSeats ?? 0}
 						</CardTitle>
+					</CardHeader>
+					<CardHeader className="pb-2">
+						<CardDescription className="text-xl">
+							Unscanned seats:{" "}
+						</CardDescription>
+						<CardTitle className="text-3xl">
+							{(selectedSessionDetails?.registeredSeats ?? 0) - scannedSeats}
+						</CardTitle>
+					</CardHeader>
+					<CardHeader className="pb-2">
+						<CardDescription className="text-lg">
+							Scanned seats:{" "}
+						</CardDescription>
+						<CardTitle className="text-3xl">{scannedSeats}</CardTitle>
 					</CardHeader>
 				</Card>
 				{/* Current Session Card */}
@@ -273,6 +351,7 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 								className="rounded-lg bg-background border-gray-600 md:w-[200px] lg:w-[336px]"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
+								onKeyDown={handleKeyDown}
 							/>
 							<Button className="w-14" onClick={handleSearch}>
 								<Search />
@@ -326,18 +405,31 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 										</TableCell>
 										<TableCell className="hidden sm:table-cell">
 											<Badge
-												className="text-xs"
+												style={
+													registration.status === "verified"
+														? { backgroundColor: "green", color: "white" } // Adjust colors as needed
+														: undefined
+												}
 												variant={
-													registration.status === "Fulfilled"
-														? "secondary"
-														: "outline"
+													registration.status === "cancelled"
+														? "destructive"
+														: "default"
 												}
 											>
 												{registration.status}
 											</Badge>
 										</TableCell>
 										<TableCell className="hidden sm:table-cell">
-											VERIFY
+											{registration.status !== "cancelled" && (
+												<Button
+													onClick={() => {
+														handleManualVerify(registration.code);
+													}}
+													variant="default"
+												>
+													Verify
+												</Button>
+											)}
 										</TableCell>
 									</TableRow>
 								))}

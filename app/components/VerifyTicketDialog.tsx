@@ -31,7 +31,7 @@ const VerifyTicketDialog = ({
 						</DialogTitle>
 					</DialogHeader>
 					{sessionCode ? (
-						<QrCodeScanner />
+						<QrCodeScanner sessionCode={sessionCode} />
 					) : (
 						<div className="text-red-500">Error: Please select a session.</div>
 					)}

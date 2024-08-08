@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Html5QrcodeScanner, Html5QrcodeResult } from "html5-qrcode";
 
-const QrCodeScanner: React.FC = () => {
+function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 	const [isScanning, setIsScanning] = useState(false);
 	const html5QrCodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
 
@@ -66,6 +66,6 @@ const QrCodeScanner: React.FC = () => {
 			</button>
 		</div>
 	);
-};
+}
 
 export default QrCodeScanner;
