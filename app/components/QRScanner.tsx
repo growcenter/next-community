@@ -17,7 +17,7 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 
 			try {
 				const response = await fetch(
-					`http://localhost:8080/api/v1/internal/events/registrations/${uuid}`,
+					`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/internal/events/registrations/${uuid}`,
 					{
 						method: "PATCH",
 						headers: {
