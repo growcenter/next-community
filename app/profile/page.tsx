@@ -234,13 +234,16 @@ function Registrations() {
 																</TableCell>
 																<TableCell className="hidden md:table-cell">
 																	<Badge variant="outline">
-																		{registration.status}
+																		{registration.status}{" "}
 																	</Badge>
 																</TableCell>
 																<TableCell>
 																	{registration.status === "registered" && (
 																		<QRDialog
 																			registrationCode={registration.code}
+																			name={registration.name}
+																			eventName={registration.eventName}
+																			sessionName={registration.sessionName}
 																		/>
 																	)}
 																</TableCell>

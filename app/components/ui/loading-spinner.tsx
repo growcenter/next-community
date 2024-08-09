@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { LoaderIcon } from "lucide-react";
 
-const spinnerVariants = "w-16 h-16 rounded-full animate-spin";
+const spinnerVariants = "mx-auto w-16 h-16 rounded-full animate-spin";
 
 interface LoadingSpinnerProps extends React.HTMLAttributes<SVGSVGElement> {
 	className?: string;

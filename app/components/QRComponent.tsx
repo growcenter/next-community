@@ -14,9 +14,17 @@ import { Button } from "./ui/button";
 
 interface QRDialogProps {
 	registrationCode: string;
+	name: string;
+	eventName: string;
+	sessionName: string;
 }
 
-const QRDialog: React.FC<QRDialogProps> = ({ registrationCode }) => {
+const QRDialog: React.FC<QRDialogProps> = ({
+	registrationCode,
+	name,
+	eventName,
+	sessionName,
+}) => {
 	const { Image } = useQRCode();
 
 	return (
@@ -30,6 +38,13 @@ const QRDialog: React.FC<QRDialogProps> = ({ registrationCode }) => {
 				aria-describedby="QR Code for the user's current registration"
 				className="sm:max-w-[425px] mx-auto overflow-y-scroll max-h-screen"
 			>
+				<DialogHeader>
+					<div className="flex flex-col items-center">
+						<b>{name}</b>
+						<span>{eventName}</span>
+						<span className="text-gray-400">{sessionName}</span>
+					</div>
+				</DialogHeader>
 				<Image
 					text={registrationCode}
 					options={{

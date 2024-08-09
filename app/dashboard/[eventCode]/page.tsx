@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "../../components/ui/badge";
 import QrCodeScanner from "../../components/QRScanner";
 import VerifyTicketDialog from "../../components/VerifyTicketDialog";
+import { LoadingSpinner } from "../../components/ui/loading-spinner";
 import {
 	Card,
 	CardContent,
@@ -48,7 +49,7 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 	const [selectedSessionName, setSelectedSessionName] = useState<string | null>(
 		null
 	);
-
+	const [scannerValid, setScannerValid] = useState<boolean>(false);
 	const [eventName, setEventName] = useState<string | null>(null);
 	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
@@ -210,7 +211,7 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 	};
 
 	const handleManualVerify = async (code: string) => {
-		// Optimistically update the state
+		setLoading(true);
 		setRegistrations((prevRegistrations) =>
 			prevRegistrations.map((registration) =>
 				registration.code === code
@@ -252,6 +253,34 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 				)
 			);
 			setScannedSeats((prevScannedSeats) => prevScannedSeats - 1);
+		} finally {
+			setLoading(false);
+		}
+	};
+	const handleCheckSession = async (code: string) => {
+		setLoading(true);
+		try {
+			const response = await fetch(
+				`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/events/summary/${code}`,
+				{
+					method: "GET",
+					headers: {
+						"X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${userData.token}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error(`Error: ${response.statusText}`);
+			}
+			const data = await response.json();
+			setScannerValid(data.isScannerValid);
+		} catch (error) {
+			console.error("Error:", error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -263,57 +292,70 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 					<CardHeader className="pb-3">
 						<CardTitle className="text-center mb-6">Sessions</CardTitle>
 					</CardHeader>
-					<CardFooter className="gap-2 content-center justify-center">
-						{sessions.map((session) => (
-							<Button
-								className={`w-full ${
-									selectedSession === session.code
-										? "bg-green-500 text-white"
-										: ""
-								}`}
-								key={session.code}
-								onClick={() => {
-									setSelectedSession(session.code);
-									setSelectedSessionName(session.name);
-								}}
-							>
-								{session.code}
-							</Button>
-						))}
-					</CardFooter>
+					{loading ? (
+						<LoadingSpinner></LoadingSpinner>
+					) : (
+						<CardFooter className="flex flex-col w-fit mx-auto gap-2 content-center justify-center">
+							{sessions.map((session) => (
+								<Button
+									className={`w-full ${
+										selectedSession === session.code
+											? "bg-green-500 text-white"
+											: ""
+									}`}
+									key={session.code}
+									onClick={() => {
+										setSelectedSession(session.code);
+										setSelectedSessionName(session.name);
+										handleCheckSession(session.code);
+									}}
+								>
+									{session.code}
+								</Button>
+							))}
+						</CardFooter>
+					)}
 				</Card>
 				{/* Registered and Scanned Cards */}
 				<Card className="text-center p-3">
-					<CardHeader className="pb-2 text-center">
-						<CardDescription className="text-xl">
-							Current Session:
-						</CardDescription>
-						<CardTitle className="text-4xl">
-							{selectedSessionName || "None"}
-						</CardTitle>
-					</CardHeader>
-					<CardHeader className="pb-2">
-						<CardDescription className="text-xl">
-							Registered seats:{" "}
-						</CardDescription>
-						<CardTitle className="text-3xl">
-							{selectedSessionDetails?.registeredSeats ?? 0}
-						</CardTitle>
-					</CardHeader>
-					<CardHeader className="pb-2">
-						<CardDescription className="text-xl">
-							Unscanned seats:{" "}
-						</CardDescription>
-						<CardTitle className="text-3xl">
-							{(selectedSessionDetails?.registeredSeats ?? 0) - scannedSeats}
-						</CardTitle>
-					</CardHeader>
-					<CardHeader className="pb-2">
-						<CardDescription className="text-lg">
-							Scanned seats:{" "}
-						</CardDescription>
-						<CardTitle className="text-3xl">{scannedSeats}</CardTitle>
-					</CardHeader>
+					{loading ? (
+						<LoadingSpinner></LoadingSpinner>
+					) : (
+						<>
+							{" "}
+							<CardHeader className="pb-2 text-center">
+								<CardDescription className="text-xl">
+									Current Session:
+								</CardDescription>
+								<CardTitle className="text-4xl">
+									{selectedSessionName || "None"}
+								</CardTitle>
+							</CardHeader>
+							<CardHeader className="pb-2">
+								<CardDescription className="text-xl">
+									Registered seats:{" "}
+								</CardDescription>
+								<CardTitle className="text-3xl">
+									{selectedSessionDetails?.registeredSeats ?? 0}
+								</CardTitle>
+							</CardHeader>
+							<CardHeader className="pb-2">
+								<CardDescription className="text-xl">
+									Unscanned seats:{" "}
+								</CardDescription>
+								<CardTitle className="text-3xl">
+									{(selectedSessionDetails?.registeredSeats ?? 0) -
+										scannedSeats}
+								</CardTitle>
+							</CardHeader>
+							<CardHeader className="pb-2">
+								<CardDescription className="text-lg">
+									Scanned seats:{" "}
+								</CardDescription>
+								<CardTitle className="text-3xl">{scannedSeats}</CardTitle>
+							</CardHeader>
+						</>
+					)}
 				</Card>
 				{/* Current Session Card */}
 				<Card className="flex flex-col items-center justify-center">
@@ -325,12 +367,20 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 							{selectedSessionName || "None"}
 						</CardTitle>
 					</CardHeader>
-					<CardFooter className="mt-5">
-						<VerifyTicketDialog
-							sessionCode={selectedSession || ""}
-							sessionName={selectedSessionName || ""}
-						/>
-					</CardFooter>
+					{scannerValid && (
+						<CardFooter className="mt-5">Scanner disabled!</CardFooter>
+					) ? (
+						<>
+							<CardFooter className="mt-5">
+								<VerifyTicketDialog
+									sessionCode={selectedSession || ""}
+									sessionName={selectedSessionName || ""}
+								/>
+							</CardFooter>
+						</>
+					) : (
+						<CardFooter className="mt-5">Scanner disabled!</CardFooter>
+					)}
 				</Card>
 			</section>
 
@@ -381,59 +431,86 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 									<TableHead className="hidden sm:table-cell">Verify</TableHead>
 								</TableRow>
 							</TableHeader>
-							<TableBody>
-								{registrations.map((registration, index) => (
-									<TableRow key={index} className="border-b border-gray-200">
-										<TableCell className="flex flex-col sm:table-cell">
-											<div className="font-medium">{registration.name}</div>
-											<div className="text-sm text-muted-foreground sm:hidden">
-												{registration.accountNumber}
-											</div>
-										</TableCell>
-										<TableCell className="flex flex-col sm:table-cell">
-											<div className="hidden sm:inline">
-												{registration.identifier}
-											</div>
-											<div className="inline sm:hidden text-sm">
-												<span className="font-medium">ID:</span>{" "}
-												{registration.sessionCode}
-											</div>
-										</TableCell>
+							{loading ? (
+								<LoadingSpinner />
+							) : (
+								<TableBody>
+									{registrations.map((registration, index) => (
+										<TableRow key={index} className="border-b border-gray-200">
+											<TableCell className="flex flex-col sm:table-cell">
+												<div className="font-medium">{registration.name}</div>
+												<div className="text-sm text-muted-foreground sm:hidden">
+													{registration.accountNumber}
+												</div>
+											</TableCell>
+											<TableCell className="flex flex-col sm:table-cell">
+												<div className="inline sm:hidden text-sm">
+													<span className="font-medium">Identifier:</span>{" "}
+													{registration.identifier}
+												</div>
+												<div className="inline sm:hidden text-sm">
+													<span className="font-medium">Registered By:</span>{" "}
+													{registration.registeredBy}
+												</div>
+												<div className="inline sm:hidden text-sm">
+													<span className="font-medium">Status:</span>{" "}
+													{registration.status}
+												</div>
+												<div className="inline sm:hidden text-sm mt-2">
+													{!(
+														registration.status === "cancelled" ||
+														registration.status === "verified"
+													) && (
+														<Button
+															onClick={() => {
+																handleManualVerify(registration.code);
+															}}
+															variant="default"
+														>
+															Verify
+														</Button>
+													)}
+												</div>
+											</TableCell>
 
-										<TableCell className="hidden sm:table-cell">
-											{registration.registeredBy}
-										</TableCell>
-										<TableCell className="hidden sm:table-cell">
-											<Badge
-												style={
-													registration.status === "verified"
-														? { backgroundColor: "green", color: "white" } // Adjust colors as needed
-														: undefined
-												}
-												variant={
-													registration.status === "cancelled"
-														? "destructive"
-														: "default"
-												}
-											>
-												{registration.status}
-											</Badge>
-										</TableCell>
-										<TableCell className="hidden sm:table-cell">
-											{registration.status !== "cancelled" && (
-												<Button
-													onClick={() => {
-														handleManualVerify(registration.code);
-													}}
-													variant="default"
+											<TableCell className="hidden sm:table-cell">
+												{registration.registeredBy}
+											</TableCell>
+											<TableCell className="hidden sm:table-cell">
+												<Badge
+													style={
+														registration.status === "verified"
+															? { backgroundColor: "green", color: "white" } // Adjust colors as needed
+															: undefined
+													}
+													variant={
+														registration.status === "cancelled"
+															? "destructive"
+															: "default"
+													}
 												>
-													Verify
-												</Button>
-											)}
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
+													{registration.status}
+												</Badge>
+											</TableCell>
+											<TableCell className="hidden sm:table-cell">
+												{!(
+													registration.status === "cancelled" ||
+													registration.status === "verified"
+												) && (
+													<Button
+														onClick={() => {
+															handleManualVerify(registration.code);
+														}}
+														variant="default"
+													>
+														{loading ? "Verifying" : "Verify"}
+													</Button>
+												)}
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							)}
 						</Table>
 						<Pagination>
 							<PaginationContent>

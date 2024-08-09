@@ -1,71 +1,65 @@
-import React, { useState, useRef } from "react";
-import { Html5QrcodeScanner, Html5QrcodeResult } from "html5-qrcode";
+import { useState } from "react";
+import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
+import { useToast } from "./ui/use-toast"; // Import use-toast hook
+import { Button } from "./ui/button"; // Import the Button component for the toast action
+import { useAuth } from "./AuthProvider";
 
 function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
-	const [isScanning, setIsScanning] = useState(false);
-	const html5QrCodeScannerRef = useRef<Html5QrcodeScanner | null>(null);
+	const { toast } = useToast(); // Initialize the toast hook
+	const { isAuthenticated, handleExpiredToken } = useAuth();
+	const userData = isAuthenticated
+		? JSON.parse(localStorage.getItem("userData") || "{}")
+		: null;
 
-	const onScanSuccess = (
-		decodedText: string,
-		decodedResult: Html5QrcodeResult
-	) => {
-		console.log(`Scan result: ${decodedText}`, decodedResult);
-		alert(`Scan result: ${decodedText}`);
-		// Stop scanning after a successful scan
-		if (html5QrCodeScannerRef.current) {
-			html5QrCodeScannerRef.current
-				.clear()
-				.then(() => {
-					html5QrCodeScannerRef.current = null;
-					setIsScanning(false);
-				})
-				.catch((err) => {
-					console.error("Failed to clear qr scanner", err);
+	const handleScan = async (result: IDetectedBarcode[]) => {
+		if (result && result.length > 0) {
+			const uuid = result[0]?.rawValue;
+
+			try {
+				const response = await fetch(
+					`http://localhost:8080/api/v1/internal/events/registrations/${uuid}`,
+					{
+						method: "PATCH",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${userData.token}`,
+							"X-API-Key": process.env.NEXT_PUBLIC_API_KEY || "",
+						},
+						body: JSON.stringify({
+							sessionCode: sessionCode,
+							status: "active",
+						}),
+					}
+				);
+
+				if (response.ok) {
+					toast({
+						title: "Success!",
+						description: "User verified.",
+						duration: 2000,
+					});
+				} else {
+					const errorData = await response.json();
+					toast({
+						title: errorData.status || "Error",
+						description: errorData.message || "Something went wrong.",
+						variant: "destructive",
+						duration: 5000,
+					});
+				}
+			} catch (error) {
+				toast({
+					title: `Error : ${error}`,
+					description: "Error while connecting to the API.",
+					variant: "destructive",
+					duration: 3000,
 				});
+				console.error("Error while connecting to the API", error);
+			}
 		}
 	};
 
-	const onScanError = (errorMessage: string) => {
-		// Handle errors here
-	};
-
-	const startScanner = () => {
-		if (!html5QrCodeScannerRef.current) {
-			html5QrCodeScannerRef.current = new Html5QrcodeScanner(
-				"reader",
-				{ fps: 10, qrbox: 200 },
-				false // Disable verbose logging
-			);
-			html5QrCodeScannerRef.current.render(onScanSuccess, onScanError);
-			setIsScanning(true);
-		}
-	};
-
-	const clearScanner = () => {
-		if (html5QrCodeScannerRef.current) {
-			html5QrCodeScannerRef.current
-				.clear()
-				.then(() => {
-					html5QrCodeScannerRef.current = null;
-					setIsScanning(false);
-				})
-				.catch((err) => {
-					console.error("Failed to clear qr scanner", err);
-				});
-		}
-	};
-
-	return (
-		<div className="w-full h-full mx-auto">
-			<div className="w-full h-[300px] sm:h-[500px]" id="reader"></div>
-			<button onClick={startScanner} disabled={isScanning}>
-				Start Scanner
-			</button>
-			<button onClick={clearScanner} disabled={!isScanning}>
-				Clear Scanner
-			</button>
-		</div>
-	);
+	return <Scanner scanDelay={2000} allowMultiple={true} onScan={handleScan} />;
 }
 
 export default QrCodeScanner;

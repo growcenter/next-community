@@ -24,7 +24,7 @@ const VerifyTicketDialog = ({
 				<DialogTrigger asChild>
 					<Button className="w-36 h-10">Scanner</Button>
 				</DialogTrigger>
-				<DialogContent className="w-full max-w-lg sm:max-w-3xl">
+				<DialogContent className="w-full max-w-lg md:max-w-xl mx-auto my-auto flex flex-col justify-center items-center">
 					<DialogHeader>
 						<DialogTitle>
 							Current Session: {sessionName} ({sessionCode})
