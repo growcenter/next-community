@@ -36,7 +36,7 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 					toast({
 						title: "Success!",
 						description: "User verified.",
-						duration: 2000,
+						duration: 3000,
 					});
 				} else {
 					const errorData = await response.json();
@@ -59,7 +59,7 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 		}
 	};
 
-	return <Scanner scanDelay={2000} allowMultiple={true} onScan={handleScan} />;
+	return <Scanner scanDelay={3000} allowMultiple={true} onScan={handleScan} />;
 }
 
 export default QrCodeScanner;

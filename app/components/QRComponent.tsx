@@ -60,6 +60,9 @@ const QRDialog: React.FC<QRDialogProps> = ({
 						},
 					}}
 				/>
+				<span className="text-xs text-gray-500 text-center">
+					{registrationCode}
+				</span>
 			</DialogContent>
 		</Dialog>
 	);

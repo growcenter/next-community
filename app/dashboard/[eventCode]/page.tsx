@@ -310,7 +310,7 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 										handleCheckSession(session.code);
 									}}
 								>
-									{session.code}
+									{session.name}
 								</Button>
 							))}
 						</CardFooter>
