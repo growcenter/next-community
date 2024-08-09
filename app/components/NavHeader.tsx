@@ -60,6 +60,24 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 														</NavigationMenuLink>
 													</Link>
 												</NavigationMenuItem>
+												<NavigationMenuItem>
+													<Link href="/profile" legacyBehavior passHref>
+														<NavigationMenuLink
+															className={navigationMenuTriggerStyle()}
+														>
+															My Profile
+														</NavigationMenuLink>
+													</Link>
+												</NavigationMenuItem>
+												<NavigationMenuItem>
+													<Link href="/events" legacyBehavior passHref>
+														<NavigationMenuLink
+															className={navigationMenuTriggerStyle()}
+														>
+															Events
+														</NavigationMenuLink>
+													</Link>
+												</NavigationMenuItem>
 											</>
 										) : (
 											<>
@@ -127,15 +145,35 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 							{isAuthenticated ? (
 								<>
 									{userData.role === "admin" ? (
-										<NavigationMenuItem>
-											<Link href="/dashboard" legacyBehavior passHref>
-												<NavigationMenuLink
-													className={navigationMenuTriggerStyle()}
-												>
-													Dashboard
-												</NavigationMenuLink>
-											</Link>
-										</NavigationMenuItem>
+										<>
+											<NavigationMenuItem>
+												<Link href="/dashboard" legacyBehavior passHref>
+													<NavigationMenuLink
+														className={navigationMenuTriggerStyle()}
+													>
+														Dashboard
+													</NavigationMenuLink>
+												</Link>
+											</NavigationMenuItem>
+											<NavigationMenuItem>
+												<Link href="/profile" legacyBehavior passHref>
+													<NavigationMenuLink
+														className={navigationMenuTriggerStyle()}
+													>
+														My Profile
+													</NavigationMenuLink>
+												</Link>
+											</NavigationMenuItem>
+											<NavigationMenuItem>
+												<Link href="/events" legacyBehavior passHref>
+													<NavigationMenuLink
+														className={navigationMenuTriggerStyle()}
+													>
+														Events
+													</NavigationMenuLink>
+												</Link>
+											</NavigationMenuItem>
+										</>
 									) : (
 										<>
 											<NavigationMenuItem>
