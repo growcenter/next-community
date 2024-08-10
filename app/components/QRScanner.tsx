@@ -1,15 +1,26 @@
 import { useState } from "react";
 import { IDetectedBarcode, Scanner } from "@yudiel/react-qr-scanner";
-import { useToast } from "./ui/use-toast"; // Import use-toast hook
-import { Button } from "./ui/button"; // Import the Button component for the toast action
 import { useAuth } from "./AuthProvider";
+import {
+	AlertDialog,
+	AlertDialogTrigger,
+	AlertDialogContent,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogDescription,
+	AlertDialogAction,
+} from "./ui/alert-dialog";
 
 function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
-	const { toast } = useToast(); // Initialize the toast hook
-	const { isAuthenticated, handleExpiredToken } = useAuth();
+	const { isAuthenticated } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
+
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [dialogTitle, setDialogTitle] = useState("");
+	const [dialogDescription, setDialogDescription] = useState("");
+	const [dialogVariant, setDialogVariant] = useState("info"); // You can set variants based on the type of alert
 
 	const handleScan = async (result: IDetectedBarcode[]) => {
 		if (result && result.length > 0) {
@@ -33,36 +44,54 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 				);
 
 				if (response.ok) {
-					toast({
-						title: "Success!",
-						description: "User verified.",
-						duration: 3000,
-						className: "bg-green-500 text-lg p-4 rounded-lg",
-					});
+					setDialogTitle("Success!");
+					setDialogDescription("User verified.");
+					setDialogVariant("success");
 				} else {
 					const errorData = await response.json();
-					toast({
-						title: errorData.status || "Error",
-						description: errorData.message || "Something went wrong.",
-						variant: "destructive",
-						duration: 5000,
-						className: "text-xl p-4 rounded-lg",
-					});
+					setDialogTitle(errorData.status || "Error");
+					setDialogDescription(errorData.message || "Something went wrong.");
+					setDialogVariant("error");
 				}
 			} catch (error) {
-				toast({
-					title: `Error : ${error}`,
-					description: "Error while connecting to the API.",
-					variant: "destructive",
-					duration: 3000,
-					className: "text-xl p-4 rounded-lg",
-				});
+				setDialogTitle("Error");
+				setDialogDescription("Error while connecting to the API.");
+				setDialogVariant("error");
 				console.error("Error while connecting to the API", error);
 			}
+			setDialogOpen(true);
 		}
 	};
 
-	return <Scanner scanDelay={5000} allowMultiple={true} onScan={handleScan} />;
+	return (
+		<>
+			<Scanner
+				scanDelay={5000}
+				allowMultiple={true}
+				onScan={handleScan}
+				paused={dialogOpen} // Pause scanning when the dialog is open
+			/>
+
+			<AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+				<AlertDialogTrigger />
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle
+							className={
+								dialogVariant === "success" ? "text-green-500" : "text-red-500"
+							}
+						>
+							{dialogTitle}
+						</AlertDialogTitle>
+						<AlertDialogDescription>{dialogDescription}</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogAction onClick={() => setDialogOpen(false)}>
+						OK
+					</AlertDialogAction>
+				</AlertDialogContent>
+			</AlertDialog>
+		</>
+	);
 }
 
 export default QrCodeScanner;
