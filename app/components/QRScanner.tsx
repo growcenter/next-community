@@ -37,6 +37,7 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 						title: "Success!",
 						description: "User verified.",
 						duration: 3000,
+						className: "bg-green-500 text-lg p-4 rounded-lg",
 					});
 				} else {
 					const errorData = await response.json();
@@ -45,6 +46,7 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 						description: errorData.message || "Something went wrong.",
 						variant: "destructive",
 						duration: 5000,
+						className: "text-xl p-4 rounded-lg",
 					});
 				}
 			} catch (error) {
@@ -53,13 +55,14 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 					description: "Error while connecting to the API.",
 					variant: "destructive",
 					duration: 3000,
+					className: "text-xl p-4 rounded-lg",
 				});
 				console.error("Error while connecting to the API", error);
 			}
 		}
 	};
 
-	return <Scanner scanDelay={3000} allowMultiple={true} onScan={handleScan} />;
+	return <Scanner scanDelay={5000} allowMultiple={true} onScan={handleScan} />;
 }
 
 export default QrCodeScanner;

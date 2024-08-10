@@ -130,6 +130,9 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 
 	// Fetch registrations based on the selected session
 	const fetchRegistrations = async () => {
+		if (userData.role == "usher") {
+			return;
+		}
 		setLoading(true);
 		try {
 			const response = await fetch(
@@ -384,79 +387,125 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 				</Card>
 			</section>
 
-			<section className="flex flex-col gap-4 md:gap-8 lg:w-3/4">
-				{/* Registrations Table Card */}
-				<Card>
-					<CardHeader className="px-7">
-						<CardTitle className="text-xs md:text-lg">
-							Registrations for: {eventName}
-						</CardTitle>
-						<CardDescription className="font-bold text-red-700 text-xs md:text-lg">
-							*Search by Name, Identifier, or Registered By
-						</CardDescription>
-						<div className="flex items-center gap-2">
-							<Input
-								type="search"
-								placeholder="Search..."
-								className="rounded-lg bg-background border-gray-600 md:w-[200px] lg:w-[336px]"
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								onKeyDown={handleKeyDown}
-							/>
-							<Button className="w-14" onClick={handleSearch}>
-								<Search />
-							</Button>
-							<Button
-								className="w-14"
-								onClick={() => {
-									setSearchQuery("");
-									setCurrentPage(1);
-									fetchRegistrations();
-								}}
-							>
-								Reset
-							</Button>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<Table className="w-full text-sm md:text-base">
-							<TableHeader className="hidden md:table-header-group">
-								<TableRow>
-									<TableHead>Name</TableHead>
-									<TableHead>Identifier</TableHead>
-									<TableHead className="hidden sm:table-cell">
-										Registered By
-									</TableHead>
-									<TableHead className="hidden sm:table-cell">Status</TableHead>
-									<TableHead className="hidden sm:table-cell">Verify</TableHead>
-								</TableRow>
-							</TableHeader>
-							{loading ? (
-								<LoadingSpinner />
-							) : (
-								<TableBody>
-									{registrations.map((registration, index) => (
-										<TableRow key={index} className="border-b border-gray-200">
-											<TableCell className="flex flex-col sm:table-cell">
-												<div className="font-medium">{registration.name}</div>
-												<div className="text-sm text-muted-foreground sm:hidden">
-													{registration.accountNumber}
-												</div>
-											</TableCell>
-											<TableCell className="flex flex-col sm:table-cell">
-												<div className="inline sm:hidden text-sm">
-													<span className="font-medium">Identifier:</span>{" "}
-													{registration.identifier}
-												</div>
-												<div className="inline sm:hidden text-sm">
-													<span className="font-medium">Registered By:</span>{" "}
+			{isAuthenticated && userData.role == "usher" ? (
+				<></>
+			) : (
+				<section className="flex flex-col gap-4 md:gap-8 lg:w-3/4">
+					{/* Registrations Table Card */}
+					<Card>
+						<CardHeader className="px-7">
+							<CardTitle className="text-xs md:text-lg">
+								Registrations for: {eventName}
+							</CardTitle>
+							<CardDescription className="font-bold text-red-700 text-xs md:text-lg">
+								*Search by Name, Identifier, or Registered By
+							</CardDescription>
+							<div className="flex items-center gap-2">
+								<Input
+									type="search"
+									placeholder="Search..."
+									className="rounded-lg bg-background border-gray-600 md:w-[200px] lg:w-[336px]"
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+									onKeyDown={handleKeyDown}
+								/>
+								<Button className="w-14" onClick={handleSearch}>
+									<Search />
+								</Button>
+								<Button
+									className="w-14"
+									onClick={() => {
+										setSearchQuery("");
+										setCurrentPage(1);
+										fetchRegistrations();
+									}}
+								>
+									Reset
+								</Button>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<Table className="w-full text-sm md:text-base">
+								<TableHeader className="hidden md:table-header-group">
+									<TableRow>
+										<TableHead>Name</TableHead>
+										<TableHead>Identifier</TableHead>
+										<TableHead className="hidden sm:table-cell">
+											Registered By
+										</TableHead>
+										<TableHead className="hidden sm:table-cell">
+											Status
+										</TableHead>
+										<TableHead className="hidden sm:table-cell">
+											Verify
+										</TableHead>
+									</TableRow>
+								</TableHeader>
+								{loading ? (
+									<LoadingSpinner />
+								) : (
+									<TableBody>
+										{registrations.map((registration, index) => (
+											<TableRow
+												key={index}
+												className="border-b border-gray-200"
+											>
+												<TableCell className="flex flex-col sm:table-cell">
+													<div className="font-medium">{registration.name}</div>
+													<div className="text-sm text-muted-foreground sm:hidden">
+														{registration.accountNumber}
+													</div>
+												</TableCell>
+												<TableCell className="flex flex-col sm:table-cell">
+													<div className="inline sm:hidden text-sm">
+														<span className="font-medium">Identifier:</span>{" "}
+														{registration.identifier}
+													</div>
+													<div className="inline sm:hidden text-sm">
+														<span className="font-medium">Registered By:</span>{" "}
+														{registration.registeredBy}
+													</div>
+													<div className="inline sm:hidden text-sm">
+														<span className="font-medium">Status:</span>{" "}
+														{registration.status}
+													</div>
+													<div className="inline sm:hidden text-sm mt-2">
+														{!(
+															registration.status === "cancelled" ||
+															registration.status === "verified"
+														) && (
+															<Button
+																onClick={() => {
+																	handleManualVerify(registration.code);
+																}}
+																variant="default"
+															>
+																Verify
+															</Button>
+														)}
+													</div>
+												</TableCell>
+
+												<TableCell className="hidden sm:table-cell">
 													{registration.registeredBy}
-												</div>
-												<div className="inline sm:hidden text-sm">
-													<span className="font-medium">Status:</span>{" "}
-													{registration.status}
-												</div>
-												<div className="inline sm:hidden text-sm mt-2">
+												</TableCell>
+												<TableCell className="hidden sm:table-cell">
+													<Badge
+														style={
+															registration.status === "verified"
+																? { backgroundColor: "green", color: "white" } // Adjust colors as needed
+																: undefined
+														}
+														variant={
+															registration.status === "cancelled"
+																? "destructive"
+																: "default"
+														}
+													>
+														{registration.status}
+													</Badge>
+												</TableCell>
+												<TableCell className="hidden sm:table-cell">
 													{!(
 														registration.status === "cancelled" ||
 														registration.status === "verified"
@@ -467,77 +516,42 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 															}}
 															variant="default"
 														>
-															Verify
+															{loading ? "Verifying" : "Verify"}
 														</Button>
 													)}
-												</div>
-											</TableCell>
-
-											<TableCell className="hidden sm:table-cell">
-												{registration.registeredBy}
-											</TableCell>
-											<TableCell className="hidden sm:table-cell">
-												<Badge
-													style={
-														registration.status === "verified"
-															? { backgroundColor: "green", color: "white" } // Adjust colors as needed
-															: undefined
-													}
-													variant={
-														registration.status === "cancelled"
-															? "destructive"
-															: "default"
-													}
-												>
-													{registration.status}
-												</Badge>
-											</TableCell>
-											<TableCell className="hidden sm:table-cell">
-												{!(
-													registration.status === "cancelled" ||
-													registration.status === "verified"
-												) && (
-													<Button
-														onClick={() => {
-															handleManualVerify(registration.code);
-														}}
-														variant="default"
-													>
-														{loading ? "Verifying" : "Verify"}
-													</Button>
-												)}
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							)}
-						</Table>
-						<Pagination>
-							<PaginationContent>
-								<PaginationItem>
-									<PaginationPrevious
-										href="#"
-										onClick={() =>
-											handlePageChange(Math.max(currentPage - 1, 1))
-										}
-									/>
-								</PaginationItem>
-								<PaginationItem>
-									<PaginationLink href="#" isActive>
-										{currentPage}
-									</PaginationLink>
-								</PaginationItem>
-								<PaginationItem>
-									<PaginationNext
-										href="#"
-										onClick={() => handlePageChange(currentPage + 1)}
-									/>
-								</PaginationItem>
-							</PaginationContent>
-						</Pagination>
-					</CardContent>
-				</Card>
-			</section>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								)}
+							</Table>
+							<Pagination>
+								<PaginationContent>
+									<PaginationItem>
+										<PaginationPrevious
+											href="#"
+											onClick={() =>
+												handlePageChange(Math.max(currentPage - 1, 1))
+											}
+										/>
+									</PaginationItem>
+									<PaginationItem>
+										<PaginationLink href="#" isActive>
+											{currentPage}
+										</PaginationLink>
+									</PaginationItem>
+									<PaginationItem>
+										<PaginationNext
+											href="#"
+											onClick={() => handlePageChange(currentPage + 1)}
+										/>
+									</PaginationItem>
+								</PaginationContent>
+							</Pagination>
+						</CardContent>
+					</Card>
+				</section>
+			)}
 		</main>
 	);
 }

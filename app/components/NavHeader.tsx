@@ -79,6 +79,8 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 													</Link>
 												</NavigationMenuItem>
 											</>
+										) : userData.role === "usher" ? (
+											<></>
 										) : (
 											<>
 												<NavigationMenuItem>
@@ -174,6 +176,8 @@ export const NavHeader: React.FC<NavHeaderProps> = ({ children }) => {
 												</Link>
 											</NavigationMenuItem>
 										</>
+									) : userData.role === "usher" ? (
+										<></>
 									) : (
 										<>
 											<NavigationMenuItem>
