@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "./ui/button";
 import {
 	NavigationMenu,
 	NavigationMenuItem,

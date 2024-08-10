@@ -3,7 +3,7 @@
 import { EventRegistration } from "@/lib/types/eventRegistration";
 import { useAuth } from "./AuthProvider";
 import { useState, FormEvent } from "react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "./ui/button";
 import { EventSession } from "@/lib/types/eventSession";
 import { SquarePlus, SquareMinus } from "lucide-react";
 import {
