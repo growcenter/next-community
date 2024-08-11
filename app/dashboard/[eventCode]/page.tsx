@@ -181,6 +181,7 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 	useEffect(() => {
 		if (selectedSession) {
 			fetchRegistrations();
+			fetchSessions();
 		} else {
 			setRegistrations([]); // Clear registrations if no session is selected
 		}
@@ -243,8 +244,10 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 			if (!response.ok) {
 				throw new Error(`Error: ${response.statusText}`);
 			}
-
+			const responseData = await response.json();
+			const registrantName = responseData.name || "Registrant";
 			console.log("Success: Registration verified");
+			alert(`Verification successful for ${registrantName}`);
 		} catch (error) {
 			console.error("Error:", error);
 			// Rollback optimistic update in case of error
