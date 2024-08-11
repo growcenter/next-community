@@ -70,6 +70,10 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 					},
 				}
 			);
+			if (response.status === 401) {
+				handleExpiredToken();
+				return; // Exit function after handling expired token
+			}
 			const data = await response.json();
 			if (data && Array.isArray(data.data)) {
 				setSessions(data.data);
@@ -152,6 +156,10 @@ function EventSessionsAdmin({ params }: { params: { eventCode: string } }) {
 				}
 			);
 			const data = await response.json();
+			if (response.status === 401) {
+				handleExpiredToken();
+				return; // Exit function after handling expired token
+			}
 			if (data && Array.isArray(data.data)) {
 				setRegistrations(data.data);
 				if (data.data.length > 0) {
