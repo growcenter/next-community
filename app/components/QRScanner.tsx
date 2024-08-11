@@ -12,7 +12,7 @@ import {
 } from "./ui/alert-dialog";
 
 function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, handleExpiredToken } = useAuth();
 	const userData = isAuthenticated
 		? JSON.parse(localStorage.getItem("userData") || "{}")
 		: null;
@@ -48,10 +48,15 @@ function QrCodeScanner({ sessionCode }: { sessionCode: string }) {
 					setDialogDescription("User verified.");
 					setDialogVariant("success");
 				} else {
-					const errorData = await response.json();
-					setDialogTitle(errorData.status || "Error");
-					setDialogDescription(errorData.message || "Something went wrong.");
-					setDialogVariant("error");
+					if (response.status === 401) {
+						handleExpiredToken();
+						return; // Exit function after handling expired token
+					} else {
+						const errorData = await response.json();
+						setDialogTitle(errorData.status || "Error");
+						setDialogDescription(errorData.message || "Something went wrong.");
+						setDialogVariant("error");
+					}
 				}
 			} catch (error) {
 				setDialogTitle("Error");
